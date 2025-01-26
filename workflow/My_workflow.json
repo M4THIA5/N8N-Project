@@ -1,0 +1,70 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Test if the server is started",
+        "height": 260,
+        "width": 380
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        -240
+      ],
+      "id": "bdf880fa-949b-4071-a975-da36f95376d8",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "url": "http://api:3000/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -240,
+        -140
+      ],
+      "id": "bc8d4a7d-237c-40cf-ab90-85315a01a1fe",
+      "name": "Hello world"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -460,
+        -140
+      ],
+      "id": "a0497ade-126d-4935-89ab-734230944735",
+      "name": "When click, run call api"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When click, run call api": {
+      "main": [
+        [
+          {
+            "node": "Hello world",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f800cf7c-62a6-4ec8-aa85-d6b92e9d7a85",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cdca0e3c8f9e8745010bb2b4c297b406a805cef76e8eb1bb04f42ea6b3ddaf42"
+  },
+  "id": "9mc8zeSr1UW4XhOi",
+  "tags": []
+}

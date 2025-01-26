@@ -1,0 +1,23 @@
+{
+  "name": "projet-final",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "dev": "node --import=tsx src/index.ts",
+    "start": "node --import=tsx src/index.ts",
+    "init-db": "node --import=tsx ./database/init-db.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "express": "^4.21.2",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "tsx": "^4.19.2"
+  }
+}
