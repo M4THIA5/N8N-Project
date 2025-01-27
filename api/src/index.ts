@@ -16,7 +16,6 @@ app.get('/', (req: Request, res: Response) => {
   res.send('Hello World!');
 });
 
-app.use(bodyParser.urlencoded());
 app.use('/tasks', taskRouter);
 app.use('/lists', listRouter);
 app.use('/users', userRouter);
