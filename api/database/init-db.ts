@@ -45,9 +45,10 @@ const createTableList = () => {
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT,
     description TEXT,
-    user_id INTEGER,
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    owner_id INTEGER,
+    FOREIGN KEY (owner_id) REFERENCES users(id)
   )`;
+
 
   db.run(query, (err) => {
     if (err) {
@@ -57,6 +58,26 @@ const createTableList = () => {
     }
   });
 };
+
+
+const createLinkTable = () => {
+  const query = `CREATE TABLE IF NOT EXISTS users_lists (
+    user_id INTEGER,
+    list_id INTEGER,
+    FOREIGN KEY (list_id) REFERENCES lists(id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    PRIMARY KEY (user_id, list_id)
+  )`;
+
+  db.run(query, (err) => {
+    if (err) {
+      console.log('Error creating table users_lists');
+    } else {
+      console.log('Table lists created');
+    }
+  });
+};
+
 
 createTableUser();
 createTableList();

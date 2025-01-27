@@ -72,4 +72,31 @@ userRouter.delete('/:id', (req, res) => {
     });
 });
 
+
+userRouter.put('/', (req, res) => {
+    const { username, password, user_id, list_id } = req.body;
+    if (!username || !password) {
+        res.status(400).send('Invalid input');
+        return;
+    }
+    const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
+    db.get(query, [username, password], (err, row) => {
+        if (err) {
+            res.status(500).send('Error fetching user');
+            return;
+        }
+        if (!row) {
+            res.status(401).send('Authentication failed');
+            return;
+        }
+        const query1 = 'UPDATE lists SET owner_id = ? WHERE id = ? and owner_id = ?';
+        db.run(query1, [user_id, list_id, row.id], function (err) {
+            if (err) {
+                res.status(500).send('Error updating list');
+            } else {
+                res.status(200).send(`List updated with id ${list_id}`);
+            }
+        });
+    });
+});
 export default userRouter;
