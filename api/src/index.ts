@@ -6,6 +6,7 @@ import userRouter from './routes/UserRouter';
 import sqlite3 from 'sqlite3';
 
 const app = express();
+
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
