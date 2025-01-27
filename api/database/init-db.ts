@@ -1,5 +1,25 @@
 import { db } from "../src/index";
 
+
+const createTableUser = () => {
+  const query = `CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    username TEXT,
+    password TEXT
+    )`;
+
+  db.run(query, (err) => {
+    if (err) {
+      console.log('Error creating table users');
+    } else {
+      console.log('Table users created');
+    }
+  });
+};
+
+
+
 const createTableTask = () => {
   const query = `CREATE TABLE IF NOT EXISTS tasks (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -22,7 +42,9 @@ const createTableList = () => {
   const query = `CREATE TABLE IF NOT EXISTS lists (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT,
-    description TEXT
+    description TEXT,
+    user_id INTEGER,
+    FOREIGN KEY (user_id) REFERENCES users(id)
   )`;
 
   db.run(query, (err) => {
@@ -34,5 +56,6 @@ const createTableList = () => {
   });
 };
 
+createTableUser();
 createTableList();
 createTableTask();

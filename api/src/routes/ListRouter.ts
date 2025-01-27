@@ -4,53 +4,162 @@ import { db } from '../index';
 const listRouter = router.Router();
 
 listRouter.get('/', (req, res) => {
-  const query = 'SELECT * FROM lists';
+  const { username, password } = req.body;
 
-  db.all(query, (err, rows) => {
+  if (!username || !password) {
+    res.status(401).send('Authentication required');
+    return;
+  }
+
+  const auth = 'SELECT id FROM users WHERE username = ? AND password = ?';
+
+  db.get(auth, [username, password], (err, row) => {
     if (err) {
-      res.status(500).send('Error fetching lists');
-    } else {
-      res.json(rows);
+      res.status(500).send('Error fetching user');
+      return;
     }
+    if (!row) {
+      res.status(401).send('Authentication failed');
+      return;
+    }
+    const query = 'SELECT * FROM lists where user_id = ?';
+
+    db.all(query, [row.id], (err, rows) => {
+      if (err) {
+        res.status(500).send('Error fetching lists');
+      } else {
+        res.status(200).json(rows);
+      }
+    });
   });
 });
 
 listRouter.get('/:id', (req, res) => {
-  const query = 'SELECT * FROM lists WHERE id = ?';
+  const { username, password } = req.body;
 
-  db.get(query, [req.params.id], (err, row) => {
+  if (!username || !password) {
+    res.status(401).send('Authentication required');
+    return;
+  }
+
+  const auth = 'SELECT id FROM users WHERE username = ? AND password = ?';
+
+  db.get(auth, [username, password], (err, row) => {
     if (err) {
-      res.status(500).send('Error fetching list');
-    } else {
-      res.status(200).json(row);
+      res.status(500).send('Error fetching user');
+      return;
     }
+    if (!row) {
+      res.status(401).send('Authentication failed');
+      return;
+    }
+    const query = 'SELECT * FROM lists WHERE id = ?';
+
+    db.get(query, [req.params.id], (err, row) => {
+      if (err) {
+        res.status(500).send('Error fetching list');
+      } else {
+        res.status(200).json(row);
+      }
+    });
   });
 });
 
 listRouter.post('/', (req, res) => {
+  const { username, password, name, description } = req.body;
 
-  const { name, description } = req.body;
-  const query = 'INSERT INTO lists (name, description) VALUES (?, ?)';
+  if (!username || !password) {
+    res.status(401).send('Authentication required');
+    return;
+  }
 
-  db.run(query, [name, description], function (err) {
+  const auth = 'SELECT id FROM users WHERE username = ? AND password = ?';
+
+  db.get(auth, [username, password], (err, row) => {
     if (err) {
-      res.status(500).send('Error inserting new list');
-    } else {
-      res.status(201).send(`New list created with id ${this.lastID}`);
+      res.status(500).send('Error fetching user');
+      return;
     }
+    if (!row) {
+      res.status(401).send('Authentication failed');
+      return;
+    }
+    if (!name || !description) {
+      res.status(400).send('Invalid input');
+      return;
+    }
+
+    const query = 'INSERT INTO lists (name, description, user_id) VALUES (?, ?, ?)';
+
+    db.run(query, [name, description, row.id], function (err) {
+      if (err) {
+        res.status(500).send('Error inserting new list');
+      } else {
+        res.status(201).send(`New list created with id ${this.lastID}`);
+      }
+    });
   });
 });
 
 listRouter.put('/:id', (req, res) => {
-  const { name, description } = req.body;
-  const query = 'UPDATE lists SET name = ?, description = ? WHERE id = ?';
+  const { username, password, name, description } = req.body;
 
-  db.run(query, [name, description, req.params.id], function (err) {
+  if (!username || !password) {
+    res.status(401).send('Authentication required');
+    return;
+  }
+
+  const auth = 'SELECT id FROM users WHERE username = ? AND password = ?';
+
+  db.get(auth, [username, password], (err, row) => {
     if (err) {
-      res.status(500).send('Error updating list');
-    } else {
-      res.status(200).send(`List updated with id ${req.params.id}`);
+      res.status(500).send('Error fetching user');
+      return;
     }
+    if (!row) {
+      res.status(401).send('Authentication failed');
+      return;
+    }
+    if (!name || !description) {
+      res.status(400).send('Invalid input');
+      return;
+    }
+
+    const check = 'SELECT * FROM lists WHERE id = ? AND user_id = ?';
+
+    db.get(check, [req.params.id, row.id], (err, row) => {
+      if (err) {
+        res.status(500).send('Error fetching list');
+        return;
+      }
+      if (!row) {
+        res.status(404).send('List not found');
+        return;
+      }
+      if (!name && !description) {
+        res.status(400).send('Invalid input');
+        return;
+      }
+      
+      let query = 'UPDATE lists';
+      if (name) {
+        query += ' SET name = '+ name;
+      }
+      if (description) {
+        if (name) {
+          query += ',';
+        }
+        query += ' SET description = '+ description;
+      }
+      query+= 'WHERE id = ?';
+      db.run(query, [req.params.id], function (err) {
+        if (err) {
+          res.status(500).send('Error updating list');
+        } else {
+          res.status(200).send(`List updated with id ${req.params.id}`);
+        }
+      });
+    });
   });
 });
 
