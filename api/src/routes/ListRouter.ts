@@ -53,11 +53,14 @@ listRouter.get('/:id', (req, res) => {
       res.status(401).send('Authentication failed');
       return;
     }
-    const query = 'SELECT * FROM lists WHERE id = ?';
+    const query = 'SELECT * FROM lists WHERE id = ? and user_id = ?';
 
-    db.get(query, [req.params.id], (err, row) => {
+    db.get(query, [req.params.id, row.id], (err, row) => {
       if (err) {
         res.status(500).send('Error fetching list');
+      }
+      if (!row) {
+        res.status(404).send('List not found');
       } else {
         res.status(200).json(row);
       }
@@ -140,18 +143,18 @@ listRouter.put('/:id', (req, res) => {
         res.status(400).send('Invalid input');
         return;
       }
-      
+
       let query = 'UPDATE lists';
       if (name) {
-        query += ' SET name = '+ name;
+        query += ' SET name = ' + name;
       }
       if (description) {
         if (name) {
           query += ',';
         }
-        query += ' SET description = '+ description;
+        query += ' SET description = ' + description;
       }
-      query+= 'WHERE id = ?';
+      query += 'WHERE id = ?';
       db.run(query, [req.params.id], function (err) {
         if (err) {
           res.status(500).send('Error updating list');

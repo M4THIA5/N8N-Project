@@ -16,10 +16,10 @@ taskRouter.get('/', (req, res) => {
         res.status(401).send('Invalid credentials');
         return;
       }
-      const query = 'SELECT * FROM tasks where list_id = (SELECT id FROM lists WHERE user_id = (SELECT id FROM users WHERE username = ? AND password = ?))';
+      const query = 'SELECT * FROM tasks where user_id = (SELECT id FROM users WHERE username = ? AND password = ?)';
       db.all(query, [req.body.username, req.body.password], (err, rows) => {
         if (err) {
-          res.status(500).send('Error fetching tasks');
+          res.status(500).send('Error fetching tasks : ' + err);
         } else {
           res.json(rows);
         }
@@ -46,12 +46,15 @@ taskRouter.get('/:id', (req, res) => {
       res.status(401).send('Invalid credentials');
       return;
     }
-    const query = 'SELECT * FROM tasks WHERE id = ? AND list_id = (SELECT id FROM lists WHERE user_id = (SELECT id FROM users WHERE username = ? AND password = ?))';
-    db.get(query, [req.params.id], (err, row) => {
+    const query = 'SELECT * FROM tasks WHERE id = ? AND user_id = (SELECT id FROM users WHERE username = ? AND password = ?)';
+    db.get(query, [req.params.id, username, password], (err, row) => {
       if (err) {
         res.status(500).send('Error fetching task');
-      } else {
+      }
+      if (row) {
         res.status(200).json(row);
+      } else {
+        res.status(404).send('Task not found');
       }
     });
   });
@@ -70,12 +73,19 @@ taskRouter.post('/', (req, res) => {
         res.status(401).send('Invalid credentials');
         return;
       }
-      if (!name || !description || !list_id) {
+      if (!name || !description) {
         res.status(400).send('Invalid input');
         return;
       }
-      const query = 'INSERT INTO tasks (name, description, list_id) VALUES (?, ?, ?)';
-      db.run(query, [name, description, list_id], function (err) {
+      let query;
+      let params = [name, description, row.id];
+      if (list_id) {
+        query = 'INSERT INTO tasks (name, description, user_id, list_id) VALUES (?, ?, ?, ?)';
+        params.push(list_id);
+      } else {
+        query = 'INSERT INTO tasks (name, description, user_id) VALUES (?, ?, ?)';
+      }
+      db.run(query, params, function (err) {
         if (err) {
           res.status(500).send('Error inserting new task');
         } else {
@@ -109,7 +119,7 @@ taskRouter.put('/:id', (req, res) => {
       return;
     }
 
-    const check = 'SELECT * FROM tasks WHERE id = ? AND list_id = (SELECT id FROM lists WHERE user_id = (SELECT id FROM users WHERE username = ? AND password = ?))';
+    const check = 'SELECT * FROM tasks WHERE id = ? AND user_id = (SELECT id FROM users WHERE username = ? AND password = ?)';
 
     db.get(check, [req.params.id, username, password], (err, row) => {
       if (err) {
