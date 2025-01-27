@@ -17,4 +17,4 @@ COPY . .
 EXPOSE 3000
 
 # Démarrez l'application
-CMD ["npm", "start"]
+CMD ["npm", "run", "init-db", "&&", "npm", "start"]
