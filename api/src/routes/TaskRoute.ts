@@ -61,7 +61,7 @@ taskRouter.get('/:id', (req, res) => {
 });
 
 taskRouter.post('/', (req, res) => {
-  const { username, password, name, description, list_id } = req.body;
+  const { username, password, name, description, list_id, deadline } = req.body;
   if (username && password) {
     const auth = 'SELECT * FROM users WHERE username = ? AND password = ?';
     db.get(auth, [username, password], (err, row) => {
@@ -78,12 +78,12 @@ taskRouter.post('/', (req, res) => {
         return;
       }
       let query;
-      let params = [name, description, row.id];
+      let params = [name, description, row.id, Date.parse(deadline)];
       if (list_id) {
-        query = 'INSERT INTO tasks (name, description, user_id, list_id) VALUES (?, ?, ?, ?)';
+        query = 'INSERT INTO tasks (name, description, user_id,deadline, list_id) VALUES (?, ?, ?, ?, ?)';
         params.push(list_id);
       } else {
-        query = 'INSERT INTO tasks (name, description, user_id) VALUES (?, ?, ?)';
+        query = 'INSERT INTO tasks (name, description, deadline, user_id) VALUES (?, ?,?, ?)';
       }
       db.run(query, params, function (err) {
         if (err) {
@@ -99,7 +99,7 @@ taskRouter.post('/', (req, res) => {
 });
 
 taskRouter.put('/:id', (req, res) => {
-  const { username, password, name, description, list_id } = req.body;
+  const { username, password, name, description, list_id, deadline } = req.body;
   if (!username || !password) {
     res.status(401).send('Authentication required');
     return;
@@ -145,6 +145,12 @@ taskRouter.put('/:id', (req, res) => {
           query += ','
         }
         query += ' SET list_id= ' + list_id
+      }
+      if (deadline) {
+        if (name || description || list_id) {
+          query += ','
+        }
+        query += ' SET deadline= ' + Date.parse(deadline)
       }
       query += ' WHERE id = ?';
       db.run(query, [req.params.id], function (err) {

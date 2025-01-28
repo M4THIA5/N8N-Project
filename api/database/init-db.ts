@@ -27,6 +27,7 @@ const createTableTask = () => {
     description TEXT,
     list_id INTEGER,
     user_id INTEGER,
+    deadline TEXT,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (list_id) REFERENCES lists(id)
   )`;
