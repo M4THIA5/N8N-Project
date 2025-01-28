@@ -2,3 +2,4 @@ node_modules/
 n8n_data/
 .idea
 api/database/db.sqlite
+mysql_data/

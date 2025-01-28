@@ -1,0 +1,446 @@
+{
+  "name": "Workflow taches",
+  "nodes": [
+    {
+      "parameters": {
+        "subject": "Tâches à réaliser",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1060,
+        -160
+      ],
+      "id": "2f852c0f-1315-4925-9a89-b569526228b6",
+      "name": "Gmail",
+      "webhookId": "ab43281b-147f-4bbd-9a7b-922eb3dd1433"
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=\n{{ $('Fetch Items and Format Them For n8n').first().json.mergedItems.map(item =>  \"- __\"+ item.taskname +\"__ pour \"+ item.username + \" : \"+ item.description + \"\\nÀ faire pour le \"+ item.deadline+\"\\n\\n\").join('') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        1060,
+        20
+      ],
+      "id": "aa4eb676-67fb-4db0-85b9-ea0cf35ed849",
+      "name": "Discord",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "3t8cOYkvaPFXzBOn",
+          "name": "Webhook d'infos"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT u.name username, t.name taskname, description, list_id, deadline from tasks t inner join users u on u.id = t.user_id;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        -80,
+        -60
+      ],
+      "id": "294711b6-9cf5-4808-a2bb-ddf600ebeae9",
+      "name": "Get Tasks",
+      "alwaysOutputData": true,
+      "retryOnFail": false,
+      "credentials": {
+        "mySql": {
+          "id": "WENZctOLXhneduEA",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nreturn [{json: {empty: items.length == 1 && Object.keys(items[0].json).length == 0}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        120,
+        -60
+      ],
+      "id": "01cb92e3-9cde-4664-b83b-7d541cc3c386",
+      "name": "Check for MySQL Empty Return"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "46a0c000-3f0f-4c74-8c32-757ebfefb713",
+              "leftValue": "={{ $json.empty }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        340,
+        -60
+      ],
+      "id": "19f47191-0e50-47b0-ae76-3e93416df299",
+      "name": "Is MySQL Return Empty ?",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "80cfde7a-3a35-420a-9d54-cd62368ff1f1",
+              "name": "Message",
+              "value": "Il n'y a pas de tâche à faire.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        600,
+        -160
+      ],
+      "id": "f42d2213-a612-4274-bf5f-437f00eff54a",
+      "name": "Create No Tasks Message",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -280,
+        -60
+      ],
+      "id": "653cee59-8672-4192-96e2-ec4612f4c910",
+      "name": "Everyday Trigger"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        840,
+        -60
+      ],
+      "id": "5d3ef2b5-40e0-41e4-8fd3-aab2c338a290",
+      "name": "Redirection pour envoi des messages"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1980,
+        -80
+      ],
+      "id": "9af11640-e705-48aa-a521-5ce6a573a38b",
+      "name": "FIN"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $('Get Tasks').all();\n\nconst mergedItems = items.map((item) => {\n    return {\n      username: item.json.username,\n      taskname:item.json.taskname,\n      description:item.json.description,\n      list_id:item.json.list_id,\n      deadline:item.json.deadline\n  }});\n\n  return { mergedItems };\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        580,
+        120
+      ],
+      "id": "7a4eab14-56f0-4b7d-9972-b52506dd27bb",
+      "name": "Fetch Items and Format Them For n8n"
+    },
+    {
+      "parameters": {
+        "resource": "board",
+        "operation": "get",
+        "id": {
+          "__rl": true,
+          "value": "https://trello.com/b/rvKJZiJR/tableau",
+          "mode": "url"
+        },
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.trello",
+      "typeVersion": 1,
+      "position": [
+        400,
+        360
+      ],
+      "id": "79246f41-94ee-457a-ade9-c0dad940735d",
+      "name": "Trello",
+      "credentials": {
+        "trelloApi": {
+          "id": "aJK8jJOwbSY3vmQU",
+          "name": "Trello account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "listId": "6798f92806125a48079929f3",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.trello",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        220
+      ],
+      "id": "0229c2fb-afb4-4d5c-a4e0-da2d86a79216",
+      "name": "Create Cards",
+      "credentials": {
+        "trelloApi": {
+          "id": "aJK8jJOwbSY3vmQU",
+          "name": "Trello account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "list",
+        "operation": "get",
+        "id": "6798f92806125a48079929f3",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.trello",
+      "typeVersion": 1,
+      "position": [
+        720,
+        280
+      ],
+      "id": "d847b3ff-176c-4fc1-b201-b2d1a02cd501",
+      "name": "Get List",
+      "credentials": {
+        "trelloApi": {
+          "id": "aJK8jJOwbSY3vmQU",
+          "name": "Trello account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        940,
+        280
+      ],
+      "id": "6a1f1d48-2e9d-4a1f-a046-9beb3f83404d",
+      "name": "Split Out"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Discord": {
+      "main": [
+        [
+          {
+            "node": "FIN",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Tasks": {
+      "main": [
+        [
+          {
+            "node": "Check for MySQL Empty Return",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check for MySQL Empty Return": {
+      "main": [
+        [
+          {
+            "node": "Is MySQL Return Empty ?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is MySQL Return Empty ?": {
+      "main": [
+        [
+          {
+            "node": "Create No Tasks Message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fetch Items and Format Them For n8n",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Trello",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create No Tasks Message": {
+      "main": [
+        [
+          {
+            "node": "Redirection pour envoi des messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Everyday Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Tasks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redirection pour envoi des messages": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Discord",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail": {
+      "main": [
+        [
+          {
+            "node": "FIN",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Items and Format Them For n8n": {
+      "main": [
+        [
+          {
+            "node": "Redirection pour envoi des messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trello": {
+      "main": [
+        [
+          {
+            "node": "Get List",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Create Cards": {
+      "main": [
+        [
+          {
+            "node": "FIN",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get List": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Create Cards",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a25a574b-d5a3-4df2-8f30-979db28ac159",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f3afd4c4fafbe0644a20fd2e7e1d661a90548dbed3b8bffaefd2186d3ae27fc6"
+  },
+  "id": "gQ36dkHrdHC5erSl",
+  "tags": []
+}

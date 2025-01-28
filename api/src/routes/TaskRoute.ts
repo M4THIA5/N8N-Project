@@ -7,17 +7,17 @@ taskRouter.get('/', (req, res) => {
   const { username, password } = req.body;
   if (username && password) {
     const auth = 'SELECT * FROM users WHERE username = ? AND password = ?';
-    db.get(auth, [username, password], (err, row) => {
+    db.execute(auth, [username, password], (err, row) => {
       if (err) {
         res.status(500).send('Error fetching user');
         return;
       }
-      if (!row) {
+      if (!row[0]) {
         res.status(401).send('Invalid credentials');
         return;
       }
       const query = 'SELECT * FROM tasks where user_id = (SELECT id FROM users WHERE username = ? AND password = ?)';
-      db.all(query, [req.body.username, req.body.password], (err, rows) => {
+      db.execute(query, [req.body.username, req.body.password], (err, rows) => {
         if (err) {
           res.status(500).send('Error fetching tasks : ' + err);
         } else {
@@ -37,17 +37,17 @@ taskRouter.get('/:id', (req, res) => {
     return;
   }
   const auth = 'SELECT * FROM users WHERE username = ? AND password = ?';
-  db.get(auth, [username, password], (err, row) => {
+  db.execute(auth, [username, password], (err, row) => {
     if (err) {
       res.status(500).send('Error fetching user');
       return;
     }
-    if (!row) {
+    if (!row[0]) {
       res.status(401).send('Invalid credentials');
       return;
     }
     const query = 'SELECT * FROM tasks WHERE id = ? AND user_id = (SELECT id FROM users WHERE username = ? AND password = ?)';
-    db.get(query, [req.params.id, username, password], (err, row) => {
+    db.execute(query, [req.params.id, username, password], (err, row) => {
       if (err) {
         res.status(500).send('Error fetching task');
       }
@@ -64,12 +64,12 @@ taskRouter.post('/', (req, res) => {
   const { username, password, name, description, list_id, deadline } = req.body;
   if (username && password) {
     const auth = 'SELECT * FROM users WHERE username = ? AND password = ?';
-    db.get(auth, [username, password], (err, row) => {
+    db.execute(auth, [username, password], (err, row) => {
       if (err) {
         res.status(500).send('Error fetching user');
         return;
       }
-      if (!row) {
+      if (!row[0]) {
         res.status(401).send('Invalid credentials');
         return;
       }
@@ -78,18 +78,20 @@ taskRouter.post('/', (req, res) => {
         return;
       }
       let query;
-      let params = [name, description, row.id, Date.parse(deadline)];
+      let params = [name, description, row[0].id, deadline];
       if (list_id) {
+        console.log('list_id', list_id);
         query = 'INSERT INTO tasks (name, description, user_id,deadline, list_id) VALUES (?, ?, ?, ?, ?)';
-        params.push(list_id);
+        params.push(list_id== undefined? null : list_id);
       } else {
-        query = 'INSERT INTO tasks (name, description, deadline, user_id) VALUES (?, ?,?, ?)';
+        query = 'INSERT INTO tasks (name, description,user_id, deadline ) VALUES (?, ?,?, ?)';
       }
-      db.run(query, params, function (err) {
+      console.log('params', params);
+      db.execute(query, params, function (err) {
         if (err) {
-          res.status(500).send('Error inserting new task');
+          res.status(500).send('Error inserting new task: '+ err);
         } else {
-          res.status(201).send(`New task created with id ${this.lastID}`);
+          res.status(201).send(`New task created with id ${this.lastID}`); // TODO: fix this
         }
       });
     });
@@ -105,12 +107,12 @@ taskRouter.put('/:id', (req, res) => {
     return;
   }
   const auth = 'SELECT * FROM users WHERE username = ? AND password = ?';
-  db.get(auth, [username, password], (err, row) => {
+  db.execute(auth, [username, password], (err, row) => {
     if (err) {
       res.status(500).send('Error fetching user');
       return;
     }
-    if (!row) {
+    if (!row[0]) {
       res.status(401).send('Invalid credentials');
       return;
     }
@@ -121,12 +123,12 @@ taskRouter.put('/:id', (req, res) => {
 
     const check = 'SELECT * FROM tasks WHERE id = ? AND user_id = (SELECT id FROM users WHERE username = ? AND password = ?)';
 
-    db.get(check, [req.params.id, username, password], (err, row) => {
+    db.execute(check, [req.params.id, username, password], (err, row) => {
       if (err) {
         res.status(500).send('Error fetching task');
         return;
       }
-      if (!row) {
+      if (!row[0]) {
         res.status(404).send('Task not found');
         return;
       }
@@ -153,7 +155,7 @@ taskRouter.put('/:id', (req, res) => {
         query += ' SET deadline= ' + Date.parse(deadline)
       }
       query += ' WHERE id = ?';
-      db.run(query, [req.params.id], function (err) {
+      db.execute(query, [req.params.id], function (err) {
         if (err) {
           res.status(500).send('Error updating task');
         } else {

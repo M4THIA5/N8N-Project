@@ -13,11 +13,11 @@ userRouter.post('/new', (req, res) => {
     }
     const query = 'INSERT INTO users (name, username, password) VALUES (?, ?, ?)';
 
-    db.run(query, [name, username, password], function (err) {
+    db.execute(query, [name, username, password], function (err, result) {
         if (err) {
-            res.status(500).send('Error inserting new user');
+            res.status(500).send('Error inserting new user : '+ err);
         } else {
-            res.status(201).send(`New user created with id ${this.lastID}`);
+            res.status(201).send(`New user created with id ${"an id"}`); // TODO: fix this
         }
     });
 });
@@ -29,7 +29,7 @@ userRouter.get('/', (req, res) => {
         return;
     }
     const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
-    db.get(query, [username, password], (err, row) => {
+    db.query(query, [username, password], (err, row) => {
         if (err) {
             res.status(500).send('Error fetching user');
         }
@@ -43,7 +43,7 @@ userRouter.get('/', (req, res) => {
 userRouter.delete('/:id', (req, res) => {
     const { username, password } = req.body;
     const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
-    db.get(query, [username, password], (err, row) => {
+    db.query(query, [username, password], (err, row) => {
         if (err) {
             res.status(500).send('Error fetching user');
             return;
@@ -54,14 +54,14 @@ userRouter.delete('/:id', (req, res) => {
             return;
         }
 
-        if (row.id !== parseInt(req.params.id)) {
+        if (row[0].id !== parseInt(req.params.id)) {
             res.status(403).send('Forbidden');
             return;
         }
 
         const query1 = 'DELETE FROM users WHERE id = ?';
 
-        db.run(query1, [req.params.id], function (err) {
+        db.execute(query1, [req.params.id], function (err) {
             if (err) {
                 res.status(500).send('Error deleting user');
             } else {
@@ -80,7 +80,7 @@ userRouter.put('/', (req, res) => {
         return;
     }
     const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
-    db.get(query, [username, password], (err, row) => {
+    db.query(query, [username, password], (err, row) => {
         if (err) {
             res.status(500).send('Error fetching user');
             return;
@@ -90,7 +90,7 @@ userRouter.put('/', (req, res) => {
             return;
         }
         const query1 = 'UPDATE lists SET owner_id = ? WHERE id = ? and owner_id = ?';
-        db.run(query1, [user_id, list_id, row.id], function (err) {
+        db.execute(query1, [user_id, list_id, row[0].id], function (err) {
             if (err) {
                 res.status(500).send('Error updating list');
             } else {

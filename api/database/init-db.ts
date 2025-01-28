@@ -3,15 +3,15 @@ import { db } from "../src/index";
 
 const createTableUser = () => {
   const query = `CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
     name TEXT,
     username TEXT,
     password TEXT
     )`;
 
-  db.run(query, (err) => {
+  db.execute(query, (err) => {
     if (err) {
-      console.log('Error creating table users');
+      console.log('Error creating table users : '+err );
     } else {
       console.log('Table users created');
     }
@@ -22,19 +22,19 @@ const createTableUser = () => {
 
 const createTableTask = () => {
   const query = `CREATE TABLE IF NOT EXISTS tasks (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
     name TEXT,
     description TEXT,
     list_id INTEGER,
     user_id INTEGER,
-    deadline TEXT,
+    deadline TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (list_id) REFERENCES lists(id)
   )`;
 
-  db.run(query, (err) => {
+  db.execute(query, (err) => {
     if (err) {
-      console.log('Error creating table tasks');
+      console.log('Error creating table tasks: '+err );
     } else {
       console.log('Table tasks created');
     }
@@ -43,7 +43,7 @@ const createTableTask = () => {
 
 const createTableList = () => {
   const query = `CREATE TABLE IF NOT EXISTS lists (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
     name TEXT,
     description TEXT,
     owner_id INTEGER,
@@ -51,9 +51,9 @@ const createTableList = () => {
   )`;
 
 
-  db.run(query, (err) => {
+  db.execute(query, (err) => {
     if (err) {
-      console.log('Error creating table lists');
+      console.log('Error creating table lists: '+err );
     } else {
       console.log('Table lists created');
     }
@@ -70,16 +70,16 @@ const createLinkTable = () => {
     PRIMARY KEY (user_id, list_id)
   )`;
 
-  db.run(query, (err) => {
+  db.execute(query, (err) => {
     if (err) {
-      console.log('Error creating table users_lists');
+      console.log('Error creating table users_lists: '+err );
     } else {
       console.log('Table lists created');
     }
   });
 };
 
-
 createTableUser();
 createTableList();
 createTableTask();
+createLinkTable();

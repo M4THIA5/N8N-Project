@@ -1,0 +1,95 @@
+{
+  "name": "Workflow d'Erreur",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -380,
+        0
+      ],
+      "id": "9af7279f-5395-4e6d-9474-00df0c447a8b",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "Une erreur est survenue !",
+        "options": {},
+        "embeds": {
+          "values": [
+            {
+              "description": "=__**Url du workflow**__ :  {{ $json.execution.url }}\n__**Node qui a renvoyé l'erreur**__ : {{ $json.execution.lastNodeExecuted }}\n__**Message d'erreur**__ : {{ $json.execution.error.message }}",
+              "author": "Projet N8N",
+              "color": "#FF0000",
+              "timestamp": "={{ $now }}",
+              "title": "=Erreur dans le workflow  {{ $json.workflow.name }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        -160,
+        0
+      ],
+      "id": "7ab88746-65b6-427a-82aa-e28cf547fd84",
+      "name": "Discord",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "ZDsIU5FuA98iUQrF",
+          "name": "Webhook d'erreur"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        60,
+        0
+      ],
+      "id": "fbf807e7-9076-413c-ba23-d2eaa097b056",
+      "name": "Fin"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Discord",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Discord": {
+      "main": [
+        [
+          {
+            "node": "Fin",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "cac07602-7084-4d67-a04e-824b1b53d51f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f3afd4c4fafbe0644a20fd2e7e1d661a90548dbed3b8bffaefd2186d3ae27fc6"
+  },
+  "id": "2uw0luIfklWYaXOW",
+  "tags": []
+}
