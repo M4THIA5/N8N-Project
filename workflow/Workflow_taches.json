@@ -3,30 +3,40 @@
   "nodes": [
     {
       "parameters": {
+        "sendTo": "monitaland@outlook.fr",
         "subject": "Tâches à réaliser",
+        "emailType": "text",
+        "message": "=Liste des tâches actuelles :\n\n{{ $('Fetch Items and Format Them For n8n').first().json.mergedItems.map(item =>  \"- __\"+ item.taskname +\"__ pour \"+ item.username + \" : \"+ item.description + \"\\nÀ faire pour le \"+ item.deadline+\"\\n\\n\").join('') }}",
         "options": {}
       },
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        1060,
-        -160
+        2580,
+        -200
       ],
       "id": "2f852c0f-1315-4925-9a89-b569526228b6",
       "name": "Gmail",
-      "webhookId": "ab43281b-147f-4bbd-9a7b-922eb3dd1433"
+      "webhookId": "ab43281b-147f-4bbd-9a7b-922eb3dd1433",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "WDIMxRMUetJJmOQB",
+          "name": "Gmail account"
+        }
+      },
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
         "authentication": "webhook",
-        "content": "=\n{{ $('Fetch Items and Format Them For n8n').first().json.mergedItems.map(item =>  \"- __\"+ item.taskname +\"__ pour \"+ item.username + \" : \"+ item.description + \"\\nÀ faire pour le \"+ item.deadline+\"\\n\\n\").join('') }}",
+        "content": "=# Liste des tâches actuelles :\n\n{{ $('Fetch Items and Format Them For n8n').first().json.mergedItems.map(item =>  \"- __\"+ item.taskname +\"__ pour \"+ item.username + \" : \"+ item.description + \"\\nÀ faire pour le \"+ item.deadline+\"\\n\\n\").join('') }}",
         "options": {}
       },
       "type": "n8n-nodes-base.discord",
       "typeVersion": 2,
       "position": [
-        1060,
-        20
+        2580,
+        -40
       ],
       "id": "aa4eb676-67fb-4db0-85b9-ea0cf35ed849",
       "name": "Discord",
@@ -125,7 +135,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        600,
+        920,
         -160
       ],
       "id": "f42d2213-a612-4274-bf5f-437f00eff54a",
@@ -156,19 +166,8 @@
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        840,
-        -60
-      ],
-      "id": "5d3ef2b5-40e0-41e4-8fd3-aab2c338a290",
-      "name": "Redirection pour envoi des messages"
-    },
-    {
-      "parameters": {},
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1,
-      "position": [
-        1980,
-        -80
+        3500,
+        100
       ],
       "id": "9af11640-e705-48aa-a521-5ce6a573a38b",
       "name": "FIN"
@@ -180,48 +179,27 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        580,
-        120
+        920,
+        40
       ],
       "id": "7a4eab14-56f0-4b7d-9972-b52506dd27bb",
       "name": "Fetch Items and Format Them For n8n"
     },
     {
       "parameters": {
-        "resource": "board",
-        "operation": "get",
-        "id": {
-          "__rl": true,
-          "value": "https://trello.com/b/rvKJZiJR/tableau",
-          "mode": "url"
-        },
-        "additionalFields": {}
-      },
-      "type": "n8n-nodes-base.trello",
-      "typeVersion": 1,
-      "position": [
-        400,
-        360
-      ],
-      "id": "79246f41-94ee-457a-ade9-c0dad940735d",
-      "name": "Trello",
-      "credentials": {
-        "trelloApi": {
-          "id": "aJK8jJOwbSY3vmQU",
-          "name": "Trello account"
+        "listId": "={{ $('Catch Data').item.json.id }}",
+        "name": "={{ $json.taskname }}",
+        "description": "={{ $json.description }}",
+        "additionalFields": {
+          "due": "={{ $json.deadline }}",
+          "idMembers": "="
         }
-      }
-    },
-    {
-      "parameters": {
-        "listId": "6798f92806125a48079929f3",
-        "additionalFields": {}
       },
       "type": "n8n-nodes-base.trello",
       "typeVersion": 1,
       "position": [
-        1280,
-        220
+        2780,
+        160
       ],
       "id": "0229c2fb-afb4-4d5c-a4e0-da2d86a79216",
       "name": "Create Cards",
@@ -235,18 +213,19 @@
     {
       "parameters": {
         "resource": "list",
-        "operation": "get",
-        "id": "6798f92806125a48079929f3",
+        "idBoard": "={{ $('Get Board1').item.json.id }}",
+        "name": "À faire",
         "additionalFields": {}
       },
       "type": "n8n-nodes-base.trello",
       "typeVersion": 1,
       "position": [
-        720,
-        280
+        740,
+        440
       ],
-      "id": "d847b3ff-176c-4fc1-b201-b2d1a02cd501",
-      "name": "Get List",
+      "id": "6cf204fb-3a82-4f19-a19d-71be63549f79",
+      "name": "Create List if not Exists",
+      "alwaysOutputData": true,
       "credentials": {
         "trelloApi": {
           "id": "aJK8jJOwbSY3vmQU",
@@ -256,19 +235,812 @@
     },
     {
       "parameters": {
+        "jsCode": "const items = $('Get Tasks').all();\n\nconst mergedItems = items.map((item) => {\n    return {\n      username: item.json.username,\n      taskname:item.json.taskname,\n      description:item.json.description,\n      list_id:item.json.list_id,\n      deadline:item.json.deadline\n  }});\n\n\n\n  return items;\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1600,
+        100
+      ],
+      "id": "230c36a5-92a5-4b25-bf15-05d43aef990a",
+      "name": "Fetch Items and Format Them For Trello",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "batchSize": "=1",
         "options": {}
       },
-      "type": "n8n-nodes-base.splitOut",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
       "position": [
-        940,
+        2580,
+        140
+      ],
+      "id": "d26c53bc-2f53-4201-b73e-ac46ca9027e7",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "10d36012-895f-402f-beaa-0b207ca9ca1a",
+              "name": "id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1280,
+        260
+      ],
+      "id": "6abf9331-5dfa-489d-9f7d-e9d4a8bc6ab0",
+      "name": "Catch Data"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c362040e-f9fc-4508-ba81-32b052d580a1",
+              "name": "id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        740,
+        260
+      ],
+      "id": "4235952a-eab5-4f0d-8189-8178a2b0f807",
+      "name": "get id of list"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c362040e-f9fc-4508-ba81-32b052d580a1",
+              "name": "id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1060,
+        440
+      ],
+      "id": "8f3389cb-42e7-4d72-8495-b22c1581980d",
+      "name": "get Id of new List",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "=https://api.trello.com/1/boards/{{ $json.id }}/lists",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "trelloApi",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        100,
         280
       ],
-      "id": "6a1f1d48-2e9d-4a1f-a046-9beb3f83404d",
-      "name": "Split Out"
+      "id": "cc486170-45f3-4279-8327-ca796c7f2c11",
+      "name": "Find all Lists related to board",
+      "credentials": {
+        "trelloApi": {
+          "id": "aJK8jJOwbSY3vmQU",
+          "name": "Trello account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "afd01858-ce14-4f51-9ba3-0713dfdc2ee8",
+              "leftValue": "={{ $json.name }}",
+              "rightValue": "À faire",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        260,
+        280
+      ],
+      "id": "05f5b782-c1fd-476e-9e58-ecc2d967e733",
+      "name": "Filter Lists' names",
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "fc449741-20f9-4469-83af-138e4e8b6791",
+              "leftValue": "={{ $input.item.json }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        420,
+        280
+      ],
+      "id": "b18a4c65-b5b8-400a-b133-96082e7a63e2",
+      "name": "If List exists"
+    },
+    {
+      "parameters": {
+        "content": "## Get Data",
+        "height": 300,
+        "width": 560,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -100,
+        -160
+      ],
+      "id": "db9b4bdf-e1ff-4687-bb05-9f87370f33b5",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Format Data ",
+        "height": 480,
+        "width": 1180,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        880,
+        -240
+      ],
+      "id": "35f2b72f-2025-4785-a077-aa8d617a76c2",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Send Tasks",
+        "height": 1180,
+        "width": 500,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2480,
+        -280
+      ],
+      "id": "cbe87a06-26b7-484b-b842-0beb709df1ff",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2140,
+        0
+      ],
+      "id": "5d3ef2b5-40e0-41e4-8fd3-aab2c338a290",
+      "name": "Node to have one output"
+    },
+    {
+      "parameters": {
+        "content": "## Find Board, and List in Trello",
+        "height": 820,
+        "width": 1860
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -100,
+        160
+      ],
+      "id": "ccca2d06-53c8-49d8-8bf8-fbfd7dccb9b6",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "# TASKS TRIGGERS",
+        "height": 1060,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -380,
+        -240
+      ],
+      "id": "10302434-08e7-4fd2-839e-e479f37467d9",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c362040e-f9fc-4508-ba81-32b052d580a1",
+              "name": "idofList",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "accf6e4e-3638-4918-8fdb-8696c71ed681",
+              "name": "name",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        400,
+        580
+      ],
+      "id": "b2f270cd-deb9-43e1-8424-c289618cc81c",
+      "name": "get id of list1"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.trello.com/1/boards/{{ $json.id }}/lists",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "trelloApi",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        160,
+        520
+      ],
+      "id": "751e35fa-9727-4060-8bfa-1318f627ce97",
+      "name": "Find all Lists related to board1",
+      "credentials": {
+        "trelloApi": {
+          "id": "aJK8jJOwbSY3vmQU",
+          "name": "Trello account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "afd01858-ce14-4f51-9ba3-0713dfdc2ee8",
+              "leftValue": "={{ $json.name }}",
+              "rightValue": "Terminé",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "86e133d1-58f3-4b4e-abbf-40babded0b3e",
+              "leftValue": "={{ $json.name }}",
+              "rightValue": "À faire",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -60,
+        740
+      ],
+      "id": "6559cea9-e5bf-40c4-99e9-ab6fd63d723b",
+      "name": "Filter Lists' names1",
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "fc449741-20f9-4469-83af-138e4e8b6791",
+              "leftValue": "={{ $input.item.json }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        180,
+        740
+      ],
+      "id": "585b50e4-0dc8-405f-9817-5c51502ef1d7",
+      "name": "If List exists1",
+      "alwaysOutputData": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "5ff7bd9a-e8d1-46a0-9bea-b84837368d38",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -320,
+        620
+      ],
+      "id": "1c5e4d2d-5da1-46c5-abb3-839d8de8581e",
+      "name": "On Task finished",
+      "webhookId": "5ff7bd9a-e8d1-46a0-9bea-b84837368d38"
+    },
+    {
+      "parameters": {
+        "resource": "board",
+        "operation": "get",
+        "id": {
+          "__rl": true,
+          "value": "6798f92806125a48079927c3",
+          "mode": "list",
+          "cachedResultName": "Tableau ",
+          "cachedResultUrl": "https://trello.com/b/rvKJZiJR/tableau"
+        },
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.trello",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        520
+      ],
+      "id": "f168ebeb-367e-4e14-9a5b-2f063370ec09",
+      "name": "Get Board",
+      "credentials": {
+        "trelloApi": {
+          "id": "aJK8jJOwbSY3vmQU",
+          "name": "Trello account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "board",
+        "operation": "get",
+        "id": {
+          "__rl": true,
+          "value": "6798f92806125a48079927c3",
+          "mode": "list",
+          "cachedResultName": "Tableau ",
+          "cachedResultUrl": "https://trello.com/b/rvKJZiJR/tableau"
+        },
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.trello",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        280
+      ],
+      "id": "79246f41-94ee-457a-ade9-c0dad940735d",
+      "name": "Get Board1",
+      "credentials": {
+        "trelloApi": {
+          "id": "aJK8jJOwbSY3vmQU",
+          "name": "Trello account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=La tâche __{{ $('On Task finished').item.json.taskname }}__ de **{{ $('On Task finished').item.json.username }}**\na bien été mise à jour sur Trello.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        2840,
+        640
+      ],
+      "id": "0ab340e7-9a76-4a33-be7b-1f2de1daa6dc",
+      "name": "Send message of updates",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "3t8cOYkvaPFXzBOn",
+          "name": "Webhook d'infos"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "### everyday, send tasks list\n"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -380,
+        -100
+      ],
+      "id": "646a632a-a0f8-4b0d-815e-44340d60475f",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "### when a task is marked as done"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -380,
+        580
+      ],
+      "id": "23bc11c8-0bdf-4c96-ad51-e9e4aa892315",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "id": {
+          "__rl": true,
+          "value": "={{ $json.data[0].id }}",
+          "mode": "id"
+        },
+        "updateFields": {
+          "idList": "={{ $json.data[$json.data.length-1].idofList }}"
+        }
+      },
+      "type": "n8n-nodes-base.trello",
+      "typeVersion": 1,
+      "position": [
+        2520,
+        640
+      ],
+      "id": "6c99382b-775c-445b-a356-634b5545d0a2",
+      "name": "Trello",
+      "credentials": {
+        "trelloApi": {
+          "id": "aJK8jJOwbSY3vmQU",
+          "name": "Trello account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.trello.com/1/lists/{{ $json.idofList }}/cards",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "trelloApi",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1140,
+        560
+      ],
+      "id": "0aef11b1-4fc8-44eb-9dce-4eaaa7c0d02a",
+      "name": "Find all Cards related to list",
+      "credentials": {
+        "trelloApi": {
+          "id": "aJK8jJOwbSY3vmQU",
+          "name": "Trello account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "errorMessage": "Some lists are missing. The Trello has not been updated."
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        1460,
+        1160
+      ],
+      "id": "1c316e04-487a-4e41-b2cc-5c6c1136f001",
+      "name": "Stop and Error"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.name }}",
+                    "rightValue": "À faire",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "À faire"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "54ef4260-13cf-44e8-9727-bf51dce42b6a",
+                    "leftValue": "={{ $json.name }}",
+                    "rightValue": "Terminé",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Terminé"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        580,
+        580
+      ],
+      "id": "336461af-3479-46d2-8386-a3dc275b3611",
+      "name": "Switch",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5f4c3f8a-e30b-49f1-80d9-99cde7801206",
+              "leftValue": "={{ $json }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        840,
+        580
+      ],
+      "id": "957cb3d0-008d-4947-ac1c-b1df55bfc06f",
+      "name": "If List exists2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5f4c3f8a-e30b-49f1-80d9-99cde7801206",
+              "leftValue": "={{ $json }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        840,
+        740
+      ],
+      "id": "0d81e38b-2227-4553-b0f1-87cbefc4b2f3",
+      "name": "If list exists"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "e8b364aa-f73b-450a-8bb6-441331a675fd",
+              "leftValue": "={{ $json.name }}",
+              "rightValue": "={{ $('On Task finished').item.json.taskname }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "644a0af7-82d5-4e59-ad7c-1d57b50b4f10",
+              "leftValue": "={{ $json.name }}",
+              "rightValue": "Tache 1",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        1340,
+        560
+      ],
+      "id": "e17d4d87-2180-485d-a184-ec89c8695b86",
+      "name": "Keep only task done"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        1300,
+        760
+      ],
+      "id": "1871e50b-8c50-48d1-a9f3-675fd1ade37b",
+      "name": "Merge",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        720
+      ],
+      "id": "aafb8dbd-3050-4b15-abae-48985b9e11bb",
+      "name": "Aggregate"
     }
   ],
-  "pinData": {},
+  "pinData": {
+    "On Task finished": [
+      {
+        "json": {
+          "taskname": "[Nom de la tache]",
+          "username": "[Nom de la personne qui a fait la tâche]"
+        }
+      }
+    ]
+  },
   "connections": {
     "Discord": {
       "main": [
@@ -319,7 +1091,7 @@
             "index": 0
           },
           {
-            "node": "Trello",
+            "node": "Get Board1",
             "type": "main",
             "index": 0
           }
@@ -330,7 +1102,7 @@
       "main": [
         [
           {
-            "node": "Redirection pour envoi des messages",
+            "node": "Node to have one output",
             "type": "main",
             "index": 0
           }
@@ -342,22 +1114,6 @@
         [
           {
             "node": "Get Tasks",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Redirection pour envoi des messages": {
-      "main": [
-        [
-          {
-            "node": "Gmail",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Discord",
             "type": "main",
             "index": 0
           }
@@ -379,18 +1135,238 @@
       "main": [
         [
           {
-            "node": "Redirection pour envoi des messages",
+            "node": "Node to have one output",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Trello": {
+    "Create Cards": {
       "main": [
         [
           {
-            "node": "Get List",
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create List if not Exists": {
+      "main": [
+        [
+          {
+            "node": "get Id of new List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Items and Format Them For Trello": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "FIN",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Cards",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Catch Data": {
+      "main": [
+        [
+          {
+            "node": "Fetch Items and Format Them For Trello",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get id of list": {
+      "main": [
+        [
+          {
+            "node": "Catch Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get Id of new List": {
+      "main": [
+        [
+          {
+            "node": "Catch Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find all Lists related to board": {
+      "main": [
+        [
+          {
+            "node": "Filter Lists' names",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Lists' names": {
+      "main": [
+        [
+          {
+            "node": "If List exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If List exists": {
+      "main": [
+        [
+          {
+            "node": "get id of list",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create List if not Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Node to have one output": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Discord",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get id of list1": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find all Lists related to board1": {
+      "main": [
+        [
+          {
+            "node": "Filter Lists' names1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Lists' names1": {
+      "main": [
+        [
+          {
+            "node": "If List exists1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If List exists1": {
+      "main": [
+        [
+          {
+            "node": "get id of list1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On Task finished": {
+      "main": [
+        [
+          {
+            "node": "Get Board",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Board": {
+      "main": [
+        [
+          {
+            "node": "Find all Lists related to board1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Board1": {
+      "main": [
+        [
+          {
+            "node": "Find all Lists related to board",
             "type": "main",
             "index": 0
           }
@@ -398,7 +1374,7 @@
         []
       ]
     },
-    "Create Cards": {
+    "Send message of updates": {
       "main": [
         [
           {
@@ -409,22 +1385,109 @@
         ]
       ]
     },
-    "Get List": {
+    "Trello": {
       "main": [
         [
           {
-            "node": "Split Out",
+            "node": "Send message of updates",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Split Out": {
+    "Switch": {
       "main": [
         [
           {
-            "node": "Create Cards",
+            "node": "If List exists2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If list exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If List exists2": {
+      "main": [
+        [
+          {
+            "node": "Find all Cards related to list",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If list exists": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find all Cards related to list": {
+      "main": [
+        [
+          {
+            "node": "Keep only task done",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Keep only task done": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Trello",
             "type": "main",
             "index": 0
           }
@@ -432,11 +1495,13 @@
       ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "2uw0luIfklWYaXOW"
   },
-  "versionId": "a25a574b-d5a3-4df2-8f30-979db28ac159",
+  "versionId": "3037bb3b-37d6-4751-926a-e105210aec4f",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "f3afd4c4fafbe0644a20fd2e7e1d661a90548dbed3b8bffaefd2186d3ae27fc6"

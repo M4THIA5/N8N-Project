@@ -9,7 +9,7 @@ services:
       - N8N_BASIC_AUTH_ACTIVE=true
       - N8N_BASIC_AUTH_USER=admin
       - N8N_BASIC_AUTH_PASSWORD=admin
-      - WEBHOOK_URL=http://localhost:5678/
+      - WEBHOOK_TUNNEL_URL=https://winning-sheep-only.ngrok-free.app
     volumes:
       - ./n8n_data:/home/node/.n8n:rw
     networks:
@@ -20,7 +20,8 @@ services:
     container_name: api
     restart: always
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     ports:
       - "3000:3000"
     networks:
@@ -35,6 +36,10 @@ services:
       MYSQL_DATABASE: n8n
       MYSQL_USER: n8n
       MYSQL_PASSWORD: n8n
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 50
     ports:
       - "3303:3306"
     networks:

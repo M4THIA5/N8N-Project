@@ -28,6 +28,7 @@ const createTableTask = () => {
     list_id INTEGER,
     user_id INTEGER,
     deadline TIMESTAMP,
+    done BOOLEAN DEFAULT 0,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (list_id) REFERENCES lists(id)
   )`;
