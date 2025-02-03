@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 import taskRouter from './routes/TaskRoute';
 import listRouter from './routes/ListRouter';
 import userRouter from './routes/UserRouter';
-import mariadb from 'mariadb';
+import mariadb from 'mariadb/callback';
 import cors from 'cors';
 
 const app = express();
