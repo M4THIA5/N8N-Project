@@ -8,7 +8,7 @@ taskRouter.get('/', (req, res) => {
   const { username, password } = req.body;
   if (username && password) {
     const auth = 'SELECT * FROM users WHERE username = ? AND password = ?';
-    db.execute(auth, [username, password], (err, row) => {
+    db.query(auth, [username, password], (err, row) => {
       if (err) {
         res.status(500).send('Error fetching user');
         return;
@@ -18,7 +18,7 @@ taskRouter.get('/', (req, res) => {
         return;
       }
       const query = 'SELECT * FROM tasks where user_id = (SELECT id FROM users WHERE username = ? AND password = ?)';
-      db.execute(query, [req.body.username, req.body.password], (err, rows) => {
+      db.query(query, [req.body.username, req.body.password], (err, rows) => {
         if (err) {
           res.status(500).send('Error fetching tasks : ' + err);
         } else {
@@ -38,7 +38,7 @@ taskRouter.get('/:id', (req, res) => {
     return;
   }
   const auth = 'SELECT * FROM users WHERE username = ? AND password = ?';
-  db.execute(auth, [username, password], (err, row) => {
+  db.query(auth, [username, password], (err, row) => {
     if (err) {
       res.status(500).send('Error fetching user');
       return;
@@ -48,7 +48,7 @@ taskRouter.get('/:id', (req, res) => {
       return;
     }
     const query = 'SELECT * FROM tasks WHERE id = ? AND user_id = (SELECT id FROM users WHERE username = ? AND password = ?)';
-    db.execute(query, [req.params.id, username, password], (err, row) => {
+    db.query(query, [req.params.id, username, password], (err, row) => {
       if (err) {
         res.status(500).send('Error fetching task');
       }
@@ -65,7 +65,7 @@ taskRouter.post('/', (req, res) => {
   const { username, password, name, description, list_id, deadline } = req.body;
   if (username && password) {
     const auth = 'SELECT * FROM users WHERE username = ? AND password = ?';
-    db.execute(auth, [username, password], (err, usr) => {
+    db.query(auth, [username, password], (err, usr) => {
       if (err) {
         res.status(500).send('Error fetching user');
         return;
@@ -88,7 +88,7 @@ taskRouter.post('/', (req, res) => {
         query = 'INSERT INTO tasks (name, description,user_id, deadline ) VALUES (?, ?,?, ?)';
       }
       console.log('params', params);
-      db.execute(query, params, function (err) {
+      db.query(query, params, function (err) {
         if (err) {
           res.status(500).send('Error inserting new task: ' + err);
         } else {
@@ -133,7 +133,7 @@ taskRouter.put('/:id', (req, res) => {
     return;
   }
   const auth = 'SELECT * FROM users WHERE username = ? AND password = ?';
-  db.execute(auth, [username, password], (err, row) => {
+  db.query(auth, [username, password], (err, row) => {
     if (err) {
       res.status(500).send('Error fetching user');
       return;
@@ -149,7 +149,7 @@ taskRouter.put('/:id', (req, res) => {
 
     const check = 'SELECT * FROM tasks WHERE id = ? AND user_id = (SELECT id FROM users WHERE username = ? AND password = ?)';
 
-    db.execute(check, [req.params.id, username, password], (err, row) => {
+    db.query(check, [req.params.id, username, password], (err, row) => {
       if (err) {
         res.status(500).send('Error fetching task');
         return;
@@ -181,7 +181,7 @@ taskRouter.put('/:id', (req, res) => {
         query += ' SET deadline= ' + Date.parse(deadline)
       }
       query += ' WHERE id = ?';
-      db.execute(query, [req.params.id], function (err) {
+      db.query(query, [req.params.id], function (err) {
         if (err) {
           res.status(500).send('Error updating task');
         } else {

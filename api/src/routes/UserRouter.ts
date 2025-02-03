@@ -13,7 +13,7 @@ userRouter.post('/new', (req, res) => {
     }
     const query = 'INSERT INTO users (name, username, password) VALUES (?, ?, ?)';
 
-    db.execute(query, [name, username, password], function (err, result) {
+    db.query(query, [name, username, password], function (err, result) {
         if (err) {
             res.status(500).send('Error inserting new user : ' + err);
         } else {
@@ -61,7 +61,7 @@ userRouter.delete('/:id', (req, res) => {
 
         const query1 = 'DELETE FROM users WHERE id = ?';
 
-        db.execute(query1, [req.params.id], function (err) {
+        db.query(query1, [req.params.id], function (err) {
             if (err) {
                 res.status(500).send('Error deleting user');
             } else {
@@ -90,7 +90,7 @@ userRouter.put('/', (req, res) => {
             return;
         }
         const query1 = 'UPDATE lists SET owner_id = ? WHERE id = ? and owner_id = ?';
-        db.execute(query1, [user_id, list_id, row[0].id], function (err) {
+        db.query(query1, [user_id, list_id, row[0].id], function (err) {
             if (err) {
                 res.status(500).send('Error updating list');
             } else {
@@ -117,7 +117,7 @@ userRouter.post('/done/:id', (req, res) => {
             return;
         }
         const query1 = 'UPDATE tasks SET done = 1 WHERE id = ? and user_id = ? returning *';
-        db.execute(query1, [req.params.id, usr[0].id], function (err, row) {
+        db.query(query1, [req.params.id, usr[0].id], function (err, row) {
             if (err) {
                 res.status(500).send('Error updating task :'+ err);
             } else {

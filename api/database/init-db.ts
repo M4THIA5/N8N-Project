@@ -9,7 +9,7 @@ const createTableUser = () => {
     password TEXT
     )`;
 
-  db.execute(query, (err) => {
+  db.query(query, (err) => {
     if (err) {
       console.log('Error creating table users : '+err );
     } else {
@@ -33,7 +33,7 @@ const createTableTask = () => {
     FOREIGN KEY (list_id) REFERENCES lists(id)
   )`;
 
-  db.execute(query, (err) => {
+  db.query(query, (err) => {
     if (err) {
       console.log('Error creating table tasks: '+err );
     } else {
@@ -52,7 +52,7 @@ const createTableList = () => {
   )`;
 
 
-  db.execute(query, (err) => {
+  db.query(query, (err) => {
     if (err) {
       console.log('Error creating table lists: '+err );
     } else {
@@ -71,7 +71,7 @@ const createLinkTable = () => {
     PRIMARY KEY (user_id, list_id)
   )`;
 
-  db.execute(query, (err) => {
+  db.query(query, (err) => {
     if (err) {
       console.log('Error creating table users_lists: '+err );
     } else {

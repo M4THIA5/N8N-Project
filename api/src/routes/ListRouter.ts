@@ -13,7 +13,7 @@ listRouter.get('/', (req, res) => {
 
   const auth = 'SELECT id FROM users WHERE username = ? AND password = ?';
 
-  db.execute(auth, [username, password], (err, row) => {
+  db.query(auth, [username, password], (err, row) => {
     if (err) {
       res.status(500).send('Error fetching user');
       return;
@@ -24,7 +24,7 @@ listRouter.get('/', (req, res) => {
     }
     const query = 'SELECT * FROM lists where id in (SELECT list_id FROM lists_user WHERE user_id = ?)';
 
-    db.execute(query, [row[0].id], (err, rows) => {
+    db.query(query, [row[0].id], (err, rows) => {
       if (err) {
         res.status(500).send('Error fetching lists');
       } else {
@@ -44,7 +44,7 @@ listRouter.get('/:id', (req, res) => {
 
   const auth = 'SELECT id FROM users WHERE username = ? AND password = ?';
 
-  db.execute(auth, [username, password], (err, row) => {
+  db.query(auth, [username, password], (err, row) => {
     if (err) {
       res.status(500).send('Error fetching user');
       return;
@@ -55,7 +55,7 @@ listRouter.get('/:id', (req, res) => {
     }
     const query = 'SELECT * FROM lists WHERE id in (SELECT list_id FROM lists_user WHERE user_id = ?) and id = ?';
 
-    db.execute(query, [row[0].id, req.params.id], (err, row) => {
+    db.query(query, [row[0].id, req.params.id], (err, row) => {
       if (err) {
         res.status(500).send('Error fetching list');
       }
@@ -78,7 +78,7 @@ listRouter.post('/', (req, res) => {
 
   const auth = 'SELECT id FROM users WHERE username = ? AND password = ?';
 
-  db.execute(auth, [username, password], (err, row) => {
+  db.query(auth, [username, password], (err, row) => {
     if (err) {
       res.status(500).send('Error fetching user');
       return;
@@ -94,11 +94,11 @@ listRouter.post('/', (req, res) => {
 
     const query = 'INSERT INTO lists (name, description, owner_id) VALUES (?, ?, ?)';
 
-    db.execute(query, [name, description, row[0].id], function (err) {
+    db.query(query, [name, description, row[0].id], function (err) {
       if (err) {
         res.status(500).send('Error inserting new list');
       } else {
-        db.execute('INSERT INTO lists_user (list_id, user_id) VALUES (?, ?)', [this.lastID, row[0].id], function (err) {
+        db.query('INSERT INTO lists_user (list_id, user_id) VALUES (?, ?)', [this.lastID, row[0].id], function (err) {
           if (err) {
             res.status(500).send('Error inserting new list');
           }
@@ -119,7 +119,7 @@ listRouter.put('/:id', (req, res) => {
 
   const auth = 'SELECT id FROM users WHERE username = ? AND password = ?';
 
-  db.execute(auth, [username, password], (err, row) => {
+  db.query(auth, [username, password], (err, row) => {
     if (err) {
       res.status(500).send('Error fetching user');
       return;
@@ -135,7 +135,7 @@ listRouter.put('/:id', (req, res) => {
 
     const check = 'SELECT * FROM lists WHERE id = ? AND owner_id = ?';
 
-    db.execute(check, [req.params.id, row[0].id], (err, row) => {
+    db.query(check, [req.params.id, row[0].id], (err, row) => {
       if (err) {
         res.status(500).send('Error fetching list');
         return;
@@ -160,7 +160,7 @@ listRouter.put('/:id', (req, res) => {
         query += ' SET description = ' + description;
       }
       query += 'WHERE id = ?';
-      db.execute(query, [req.params.id], function (err) {
+      db.query(query, [req.params.id], function (err) {
         if (err) {
           res.status(500).send('Error updating list');
         } else {
@@ -181,7 +181,7 @@ listRouter.delete('/:id', (req, res) => {
 
   const auth = 'SELECT id FROM users WHERE username = ? AND password = ?';
 
-  db.execute(auth, [username, password], (err, row) => {
+  db.query(auth, [username, password], (err, row) => {
     if (err) {
       res.status(500).send('Error fetching user');
       return;
@@ -193,7 +193,7 @@ listRouter.delete('/:id', (req, res) => {
 
     const check = 'SELECT * FROM lists WHERE id = ? AND owner_id = ?';
 
-    db.execute(check, [req.params.id, row[0].id], (err, row) => {
+    db.query(check, [req.params.id, row[0].id], (err, row) => {
       if (err) {
         res.status(500).send('Error fetching list');
         return;
@@ -205,11 +205,11 @@ listRouter.delete('/:id', (req, res) => {
 
       const query = 'DELETE FROM lists WHERE id = ?';
 
-      db.execute(query, [req.params.id], function (err) {
+      db.query(query, [req.params.id], function (err) {
         if (err) {
           res.status(500).send('Error deleting list');
         } else {
-          db.execute('DELETE FROM lists_user WHERE list_id = ?', [req.params.id], function (err) {
+          db.query('DELETE FROM lists_user WHERE list_id = ?', [req.params.id], function (err) {
             if (err) {
               res.status(500).send('Error deleting list');
             }
@@ -231,7 +231,7 @@ listRouter.get('/:id/tasks', (req, res) => {
 
   const auth = 'SELECT id FROM users WHERE username = ? AND password = ?';
 
-  db.execute(auth, [username, password], (err, row) => {
+  db.query(auth, [username, password], (err, row) => {
     if (err) {
       res.status(500).send('Error fetching user');
       return;
@@ -243,7 +243,7 @@ listRouter.get('/:id/tasks', (req, res) => {
 
     const check = 'SELECT * FROM lists_user WHERE list_id = ? AND user_id = ?';
 
-    db.execute(check, [req.params.id, row[0].id], (err, row) => {
+    db.query(check, [req.params.id, row[0].id], (err, row) => {
       if (err) {
         res.status(500).send('Error fetching list');
         return;
@@ -255,7 +255,7 @@ listRouter.get('/:id/tasks', (req, res) => {
 
       const query = 'SELECT * FROM tasks WHERE list_id = ?';
 
-      db.execute(query, [req.params.id], (err, rows) => {
+      db.query(query, [req.params.id], (err, rows) => {
         if (err) {
           res.status(500).send('Error fetching tasks');
         } else {
@@ -275,7 +275,7 @@ listRouter.put('/adduser/:id', (req, res) => {
   }
 
   const auth = 'SELECT * FROM users WHERE username = ? AND password = ?';
-  db.execute(auth, [username, password], (err, rowOne) => {
+  db.query(auth, [username, password], (err, rowOne) => {
     if (err) {
       res.status(500).send('Error fetching user');
       return;
@@ -286,7 +286,7 @@ listRouter.put('/adduser/:id', (req, res) => {
     }
 
     const newAuth = 'SELECT id FROM users WHERE id = ?';
-    db.execute(newAuth, [user_id], (err, row) => {
+    db.query(newAuth, [user_id], (err, row) => {
       if (err) {
         res.status(500).send('Error fetching new user');
         return;
@@ -297,7 +297,7 @@ listRouter.put('/adduser/:id', (req, res) => {
       }
 
       const check = 'SELECT * FROM lists_user WHERE list_id = ? AND user_id = ?';
-      db.execute(check, [req.params.id, rowOne[0].id], (err, row) => {
+      db.query(check, [req.params.id, rowOne[0].id], (err, row) => {
         if (err) {
           res.status(500).send('Error fetching list');
           return;
@@ -308,7 +308,7 @@ listRouter.put('/adduser/:id', (req, res) => {
         }
 
         const query = 'INSERT INTO lists_user (list_id, user_id) VALUES (?, ?)';
-        db.execute(query, [req.params.id, rowOne[0].id], function (err) {
+        db.query(query, [req.params.id, rowOne[0].id], function (err) {
           if (err) {
             res.status(500).send('Error adding user to list');
           } else {
@@ -329,7 +329,7 @@ listRouter.put('/removeuser/:id', (req, res) => {
     }
   
     const auth = 'SELECT * FROM users WHERE username = ? AND password = ?';
-    db.execute(auth, [username, password], (err, rowOne) => {
+    db.query(auth, [username, password], (err, rowOne) => {
       if (err) {
         res.status(500).send('Error fetching user');
         return;
@@ -340,7 +340,7 @@ listRouter.put('/removeuser/:id', (req, res) => {
       }
   
       const newAuth = 'SELECT id FROM users WHERE id = ?';
-      db.execute(newAuth, [user_id], (err, row) => {
+      db.query(newAuth, [user_id], (err, row) => {
         if (err) {
           res.status(500).send('Error fetching new user');
           return;
@@ -351,7 +351,7 @@ listRouter.put('/removeuser/:id', (req, res) => {
         }
   
         const check = 'SELECT * FROM lists_user WHERE list_id = ? AND user_id = ?';
-        db.execute(check, [req.params.id, rowOne[0].id], (err, row) => {
+        db.query(check, [req.params.id, rowOne[0].id], (err, row) => {
           if (err) {
             res.status(500).send('Error fetching list');
             return;
@@ -362,7 +362,7 @@ listRouter.put('/removeuser/:id', (req, res) => {
           }
   
           const query = 'DELETE FROM lists_user WHERE list_id = ? AND user_id = ?';
-          db.execute(query, [req.params.id, rowOne[0].id], function (err) {
+          db.query(query, [req.params.id, rowOne[0].id], function (err) {
             if (err) {
               res.status(500).send('Error adding user to list');
             } else {
