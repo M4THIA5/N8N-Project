@@ -94,16 +94,16 @@ listRouter.post('/', (req, res) => {
 
     const query = 'INSERT INTO lists (name, description, owner_id) VALUES (?, ?, ?)';
 
-    db.query(query, [name, description, row[0].id], function (err) {
+    db.query(query, [name, description, row[0].id], function (err, ro) {
       if (err) {
         res.status(500).send('Error inserting new list');
       } else {
-        db.query('INSERT INTO lists_user (list_id, user_id) VALUES (?, ?)', [this.lastID, row[0].id], function (err) {
+        db.query('INSERT INTO lists_user (list_id, user_id) VALUES (?, ?)', [ro.insertId, row[0].id], function (err) {
           if (err) {
             res.status(500).send('Error inserting new list');
           }
         });
-        res.status(201).send(`New list created with id ${this.lastID}`);
+        res.status(201).send(`New list created with id ${ro.insertId}`);
       }
     });
   });

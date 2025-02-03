@@ -88,7 +88,7 @@ taskRouter.post('/', (req, res) => {
         query = 'INSERT INTO tasks (name, description,user_id, deadline ) VALUES (?, ?,?, ?)';
       }
       console.log('params', params);
-      db.query(query, params, function (err) {
+      db.query(query, params, function (err, row) {
         if (err) {
           res.status(500).send('Error inserting new task: ' + err);
         } else {
@@ -117,7 +117,7 @@ taskRouter.post('/', (req, res) => {
           })
           req.write(postData);
           req.end();
-          res.status(201).send(`New task created with id ${this.lastID}`); // TODO: fix this
+          res.status(201).send(`New task created with id ${row.insertId}`); // TODO: fix this
         }
       });
     });
