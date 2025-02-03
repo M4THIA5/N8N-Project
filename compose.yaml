@@ -38,7 +38,7 @@ services:
       MARIADB_USER: n8n
       MARIADB_PASSWORD: n8n
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: [ "CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized" ]
       timeout: 5s
       retries: 50
     ports:
