@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 import taskRouter from './routes/TaskRoute';
 import listRouter from './routes/ListRouter';
 import userRouter from './routes/UserRouter';
-import mysql2 from 'mysql2';
+import mariadb from 'mariadb';
 import cors from 'cors';
 
 const app = express();
@@ -12,8 +12,8 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(cors());
 
-export const db = mysql2.createConnection({
-  host: 'mysql',
+export const db = mariadb.createConnection({
+  host: 'mariadb',
   user: 'n8n',
   password: 'n8n',
   database: 'n8n',
