@@ -29,7 +29,7 @@ services:
     # volumes:
     #   - ./api:/src:rw
   mysql:
-    image: mysql:5.7
+    image: mysql:8
     container_name: mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
@@ -46,7 +46,17 @@ services:
       - app_network
     volumes:
       - ./mysql_data:/var/lib/mysql:rw
-
+  # front:
+  #   image: php:7.2-apache
+  #   container_name: front
+  #   ports:
+  #     - "8063:80"
+  #   volumes:
+  #     - ./html:/var/www/html:rw
+  #   networks:
+  #     - app_network
+  #   depends_on:
+  #     - api
 networks:
   app_network:
     driver: bridge

@@ -8,7 +8,7 @@ const userRouter = router.Router();
 userRouter.post('/new', (req, res) => {
     const { name, username, password } = req.body;
     if (!name || !username || !password) {
-        res.status(400).send('Invalid input');
+        res.status(400).send({response:'Invalid input', code:400, message:'Invalid input : '});
         return;
     }
     const query = 'INSERT INTO users (name, username, password) VALUES (?, ?, ?)';
@@ -76,7 +76,7 @@ userRouter.delete('/:id', (req, res) => {
 userRouter.put('/', (req, res) => {
     const { username, password, user_id, list_id } = req.body;
     if (!username || !password) {
-        res.status(400).send('Invalid input');
+        res.status(400).send({response:'Invalid input', code:400, message:'Invalid input'+req.body});
         return;
     }
     const query = 'SELECT * FROM users WHERE username = ? AND password = ?';

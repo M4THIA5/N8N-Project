@@ -166,8 +166,8 @@
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        3500,
-        100
+        3240,
+        120
       ],
       "id": "9af11640-e705-48aa-a521-5ce6a573a38b",
       "name": "FIN"
@@ -802,7 +802,7 @@
       "typeVersion": 4.2,
       "position": [
         1140,
-        560
+        580
       ],
       "id": "0aef11b1-4fc8-44eb-9dce-4eaaa7c0d02a",
       "name": "Find all Cards related to list",
@@ -1031,16 +1031,7 @@
       "name": "Aggregate"
     }
   ],
-  "pinData": {
-    "On Task finished": [
-      {
-        "json": {
-          "taskname": "[Nom de la tache]",
-          "username": "[Nom de la personne qui a fait la tâche]"
-        }
-      }
-    ]
-  },
+  "pinData": {},
   "connections": {
     "Discord": {
       "main": [
@@ -1501,7 +1492,7 @@
     "callerPolicy": "workflowsFromSameOwner",
     "errorWorkflow": "2uw0luIfklWYaXOW"
   },
-  "versionId": "3037bb3b-37d6-4751-926a-e105210aec4f",
+  "versionId": "97c91b72-415b-48bb-a828-c432ba9e993b",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "f3afd4c4fafbe0644a20fd2e7e1d661a90548dbed3b8bffaefd2186d3ae27fc6"
