@@ -21,7 +21,7 @@ services:
     container_name: api
     restart: always
     depends_on:
-      mysql:
+      mariadb:
         condition: service_healthy
     ports:
       - "3000:3000"
@@ -29,14 +29,14 @@ services:
       - app_network
     # volumes:
     #   - ./api:/src:rw
-  mysql:
-    image: mysql:8
-    container_name: mysql
+  mariadb:
+    image: mariadb:latest
+    container_name: mariadb
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: n8n
-      MYSQL_USER: n8n
-      MYSQL_PASSWORD: n8n
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: n8n
+      MARIADB_USER: n8n
+      MARIADB_PASSWORD: n8n
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       timeout: 5s
@@ -46,7 +46,7 @@ services:
     networks:
       - app_network
     volumes:
-      - ./mysql_data:/var/lib/mysql:rw
+      - ./mariadb_data:/var/lib/mysql:rw
   # front:
   #   image: php:7.2-apache
   #   container_name: front
