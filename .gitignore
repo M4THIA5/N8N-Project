@@ -3,3 +3,4 @@ n8n_data/
 .idea
 api/database/db.sqlite
 mysql_data/
+mariadb_data/
