@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import taskRouter from './routes/TaskRoute';
-import listRouter from './routes/ListRouter';
+import labelRouter from './routes/LabelRouter';
 import userRouter from './routes/UserRouter';
 import mariadb from 'mariadb/callback';
 import cors from 'cors';
@@ -27,19 +27,19 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 app.use('/tasks', taskRouter);
-app.use('/lists', listRouter);
+app.use('/lists', labelRouter);
 app.use('/users', userRouter);
 
 
-app.post('/format',(req:Request,res:Response)=>{
-  const {year,month,day, hours, minutes, seconds} = req.body;
+app.post('/format', (req: Request, res: Response) => {
+  const { year, month, day, hours, minutes, seconds } = req.body;
   const date = new Date(year, month, day, hours, minutes, seconds);
-  if (isNaN(date.getTime())){
+  if (isNaN(date.getTime())) {
     res.status(400).send('Invalid input');
     return;
   }
-  res.status(200).json({date: (date.toISOString()).replace("Z", "")});
- })
+  res.status(200).json({ date: (date.toISOString()).replace("Z", "") });
+})
 
 
 app.listen(port, () => {
