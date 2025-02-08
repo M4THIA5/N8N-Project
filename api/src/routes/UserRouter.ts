@@ -8,7 +8,7 @@ const userRouter = router.Router();
 userRouter.post('/new', (req, res) => {
     const { name, username, password } = req.body;
     if (!name || !username || !password) {
-        res.status(400).send({ response: 'Invalid input', code: 400, message: 'Invalid input : ' });
+        res.status(400).send({response:'Invalid input', code:400, message:'Invalid input : '});
         return;
     }
     const query = 'INSERT INTO users (name, username, password) VALUES (?, ?, ?)';
@@ -76,7 +76,7 @@ userRouter.delete('/:id', (req, res) => {
 userRouter.put('/', (req, res) => {
     const { username, password, user_id, list_id } = req.body;
     if (!username || !password) {
-        res.status(400).send({ response: 'Invalid input', code: 400, message: 'Invalid input' + req.body });
+        res.status(400).send({response:'Invalid input', code:400, message:'Invalid input'+req.body});
         return;
     }
     const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
@@ -119,7 +119,7 @@ userRouter.post('/done/:id', (req, res) => {
         const query1 = 'UPDATE tasks SET done = 1 WHERE id = ? and user_id = ? returning *';
         db.query(query1, [req.params.id, usr[0].id], function (err, row) {
             if (err) {
-                res.status(500).send('Error updating task :' + err);
+                res.status(500).send('Error updating task :'+ err);
             } else {
 
                 const postData = JSON.stringify({
@@ -133,9 +133,9 @@ userRouter.post('/done/:id', (req, res) => {
                     headers: {
                         'Content-Type': 'application/json',
                         'Content-Length': Buffer.byteLength(postData),
-                    },
+                      },
                 };
-                const request = https.request("https://winning-sheep-only.ngrok-free.app/webhook/5ff7bd9a-e8d1-46a0-9bea-b84837368d38", options, function (resu) {
+                const req =https.request("https://winning-sheep-only.ngrok-free.app/webhook/5ff7bd9a-e8d1-46a0-9bea-b84837368d38",options, function (resu) {
                     console.log('STATUS: ' + resu.statusCode);
                     console.log('HEADERS: ' + JSON.stringify(resu.headers));
                     resu.setEncoding('utf8');
@@ -143,8 +143,8 @@ userRouter.post('/done/:id', (req, res) => {
                         console.log('BODY: ' + chunk);
                     });
                 })
-                request.write(postData);
-                request.end();
+                req.write(postData);
+                req.end();
                 res.status(200).send(`Task updated with id ${req.params.id}`);
             }
         });
