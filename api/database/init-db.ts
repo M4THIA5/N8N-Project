@@ -127,4 +127,5 @@ const createTrelloLists = () => {
 createTableUser();
 createTableLabel();
 createTableTask();
+createLinkTable();
 createTrelloLists();
