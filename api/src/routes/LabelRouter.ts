@@ -273,7 +273,7 @@ labelRouter.get('/:id/tasks', (req, res) => {
 
     db.query(check, [req.params.id, row[0].id], (err, row) => {
       if (err) {
-        res.status(500).send('Error fetching list');
+        res.status(500).send('Error fetching list' +err);
         return;
       }
       if (!row) {
