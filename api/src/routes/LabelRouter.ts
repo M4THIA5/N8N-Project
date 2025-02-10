@@ -4,8 +4,34 @@ import https from 'https';
 
 const labelRouter = router.Router();
 
-labelRouter.get('/', (req, res) => {
+labelRouter.get('/types', (req, res) => {
   res.status(200).send('Available colors : red, blue, green, yellow, purple, pink, orange, brown, black, white (with modifiers : _light or _dark)');
+});
+labelRouter.get('/', (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password) {
+    res.status(401).send('Authentication required');
+    return;
+  }
+  const auth = 'SELECT id FROM users WHERE username = ? AND password = ?';
+  db.query(auth, [username, password], (err, row) => {
+    if (err) {
+      res.status(500).send('Error fetching user');
+      return;
+    }
+    if (!row) {
+      res.status(401).send('Authentication failed');
+      return;
+    }
+    const query = 'SELECT * FROM labels';
+    db.query(query, (err, rows) => {
+      if (err) {
+        res.status(500).send('Error fetching labels : '+ err);
+      } else {
+        res.status(200).json(rows);
+      }
+    });
+  });
 });
 
 labelRouter.post('/', (req, res) => {
@@ -183,7 +209,7 @@ labelRouter.delete('/:id', (req, res) => {
         res.status(500).send('Error fetching label');
         return;
       }
-      if (!rowr) {
+      if (!rowr[0]) {
         res.status(404).send('Label not found');
         return;
       }
@@ -196,6 +222,7 @@ labelRouter.delete('/:id', (req, res) => {
         } else {
           const postData = JSON.stringify({
             name: rowr[0].name,
+            id: rowr[0].trello_id
           });
           const options = {
             port: 443,
