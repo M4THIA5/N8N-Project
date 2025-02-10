@@ -305,7 +305,7 @@ labelRouter.put('/addontask/:id', (req, res) => {
       return;
     }
 
-    const check = 'SELECT * FROM labels_tasks WHERE label_id = ? AND task_id = ?';
+    const check = 'SELECT * FROM tasks_labels WHERE label_id = ? AND task_id = ?';
     db.query(check, [req.params.id, task_id], (err, row) => {
       if (err) {
         res.status(500).send('Error fetching list'+ err);
@@ -316,7 +316,7 @@ labelRouter.put('/addontask/:id', (req, res) => {
         return;
       }
 
-      const query = 'INSERT INTO labels_tasks (label_id, task_id) VALUES (?, ?)';
+      const query = 'INSERT INTO tasks_labels (label_id, task_id) VALUES (?, ?)';
       db.query(query, [req.params.id, task_id], function (err) {
         if (err) {
           res.status(500).send('Error adding label to task');
@@ -370,7 +370,7 @@ labelRouter.put('/removeontask/:id', (req, res) => {
       return;
     }
 
-    const check = 'SELECT * FROM labels_tasks WHERE label_id = ? AND task_id = ?';
+    const check = 'SELECT * FROM tasks_labels WHERE label_id = ? AND task_id = ?';
     db.query(check, [req.params.id, task_id], (err, row) => {
       if (err) {
         res.status(500).send('Error fetching label');
@@ -381,7 +381,7 @@ labelRouter.put('/removeontask/:id', (req, res) => {
         return;
       }
 
-      const query = ' DELETE FROM labels_tasks where label_id = ? and task_id = ?';
+      const query = ' DELETE FROM tasks_labels where label_id = ? and task_id = ?';
       db.query(query, [req.params.id, task_id], function (err) {
         if (err) {
           res.status(500).send('Error removing label from task');
