@@ -109,7 +109,7 @@ const createTrelloLists = () => {
         { name: 'À faire', create: toDoList },
         { name: 'Terminé', create: doneList }
       ]);
-      const req = https.request('https://winning-sheep-only.ngrok-free.app/webhook/create-lists', options, function (res) {
+      const req2 = https.request('https://winning-sheep-only.ngrok-free.app/webhook/create-lists', options, function (res) {
         console.log('STATUS: ' + res.statusCode);
         console.log('HEADERS: ' + JSON.stringify(res.headers));
         res.setEncoding('utf8');
@@ -117,8 +117,8 @@ const createTrelloLists = () => {
           console.log('BODY: ' + chunk);
         });
       });
-      req.write(json);
-      req.end();
+      req2.write(json);
+      req2.end();
     });
   })
   req.end();
