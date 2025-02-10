@@ -29,7 +29,7 @@ const createTableTask = () => {
     deadline TIMESTAMP,
     done BOOLEAN DEFAULT 0,
     sent BOOLEAN DEFAULT 0,
-    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
   )`;
 
   db.query(query, (err: Error | null) => {

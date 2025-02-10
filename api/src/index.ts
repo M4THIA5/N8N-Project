@@ -27,7 +27,7 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 app.use('/tasks', taskRouter);
-app.use('/lists', labelRouter);
+app.use('/labels', labelRouter);
 app.use('/users', userRouter);
 
 
