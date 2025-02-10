@@ -17,7 +17,7 @@ userRouter.post('/new', (req, res) => {
         if (err) {
             res.status(500).send('Error inserting new user : ' + err);
         } else {
-            res.status(201).send(`New user created with id ${"an id"}`); // TODO: fix this
+            res.status(201).send(`New user created`);
         }
     });
 });
@@ -73,33 +73,6 @@ userRouter.delete('/:id', (req, res) => {
 });
 
 
-userRouter.put('/', (req, res) => {
-    const { username, password, user_id, list_id } = req.body;
-    if (!username || !password) {
-        res.status(400).send({ response: 'Invalid input', code: 400, message: 'Invalid input' + req.body });
-        return;
-    }
-    const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
-    db.query(query, [username, password], (err, row) => {
-        if (err) {
-            res.status(500).send('Error fetching user');
-            return;
-        }
-        if (!row) {
-            res.status(401).send('Authentication failed');
-            return;
-        }
-        const query1 = 'UPDATE lists SET owner_id = ? WHERE id = ? and owner_id = ?';
-        db.query(query1, [user_id, list_id, row[0].id], function (err) {
-            if (err) {
-                res.status(500).send('Error updating list');
-            } else {
-                res.status(200).send(`List updated with id ${list_id}`);
-            }
-        });
-    });
-});
-
 userRouter.post('/done/:id', (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) {
@@ -135,7 +108,7 @@ userRouter.post('/done/:id', (req, res) => {
                         'Content-Length': Buffer.byteLength(postData),
                     },
                 };
-                const request = https.request("https://winning-sheep-only.ngrok-free.app/webhook/5ff7bd9a-e8d1-46a0-9bea-b84837368d38", options, function (resu) {
+                const request = https.request("https://winning-sheep-only.ngrok-free.app/webhook/task-finished", options, function (resu) {
                     console.log('STATUS: ' + resu.statusCode);
                     console.log('HEADERS: ' + JSON.stringify(resu.headers));
                     resu.setEncoding('utf8');

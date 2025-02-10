@@ -107,7 +107,7 @@ taskRouter.post('/', (req, res) => {
               'Content-Length': Buffer.byteLength(postData),
             },
           };
-          const req = https.request("https://winning-sheep-only.ngrok-free.app/webhook/1692e99b-4c05-431b-be33-2287695532b9", options, function (resu) {
+          const req = https.request("https://winning-sheep-only.ngrok-free.app/webhook/task-created", options, function (resu) {
             console.log('STATUS: ' + resu.statusCode);
             console.log('HEADERS: ' + JSON.stringify(resu.headers));
             resu.setEncoding('utf8');
@@ -127,7 +127,7 @@ taskRouter.post('/', (req, res) => {
 });
 
 taskRouter.put('/:id', (req, res) => {
-  const { username, password, name, description, list_id, deadline } = req.body;
+  const { username, password, name, description, deadline } = req.body;
   if (!username || !password) {
     res.status(401).send('Authentication required');
     return;
@@ -142,7 +142,7 @@ taskRouter.put('/:id', (req, res) => {
       res.status(401).send('Invalid credentials');
       return;
     }
-    if (!name && !description && !list_id) {
+    if (!name && !description && !deadline) {
       res.status(400).send('Invalid input');
       return;
     }
@@ -168,14 +168,8 @@ taskRouter.put('/:id', (req, res) => {
         }
         query += ' SET description= ' + description
       }
-      if (list_id) {
-        if (name || description) {
-          query += ','
-        }
-        query += ' SET list_id= ' + list_id
-      }
       if (deadline) {
-        if (name || description || list_id) {
+        if (name || description) {
           query += ','
         }
         query += ' SET deadline= ' + Date.parse(deadline)
@@ -185,6 +179,7 @@ taskRouter.put('/:id', (req, res) => {
         if (err) {
           res.status(500).send('Error updating task');
         } else {
+          // TODO request
           res.status(200).send(`Task updated with id ${req.params.id}`);
         }
       });

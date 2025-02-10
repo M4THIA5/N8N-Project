@@ -28,6 +28,7 @@ const createTableTask = () => {
     user_id INTEGER,
     deadline TIMESTAMP,
     done BOOLEAN DEFAULT 0,
+    sent BOOLEAN DEFAULT 0,
     FOREIGN KEY (user_id) REFERENCES users(id),
   )`;
 
@@ -41,21 +42,41 @@ const createTableTask = () => {
 };
 
 const createTableLabel = () => {
-  const query = `CREATE TABLE IF NOT EXISTS label (
+  const query = `CREATE TABLE IF NOT EXISTS labels (
     id INTEGER PRIMARY KEY AUTO_INCREMENT,
     name TEXT DEFAULT '',
     color TEXT default null,
+    trello_id TEXT default null
   )`;
 
 
   db.query(query, (err) => {
     if (err) {
-      console.log('Error creating table lists: '+err );
+      console.log('Error creating table label : '+err );
     } else {
-      console.log('Table lists created');
+      console.log('Table label created');
     }
   });
 };
+
+const createLinkTable = () => {
+  const query = `CREATE TABLE IF NOT EXISTS tasks_labels (
+    task_id INTEGER, 
+    label_id INTEGER,
+    FOREIGN KEY (task_id) REFERENCES tasks(id),
+    FOREIGN KEY (label_id) REFERENCES labels(id),
+    PRIMARY KEY(task_id, label_id)
+  )`;
+
+
+  db.query(query, (err) => {
+    if (err) {
+      console.log('Error creating table label : '+err );
+    } else {
+      console.log('Table label created');
+    }
+  });
+}
 
 const createTrelloLists = () => {
   const auth = `?key=${key}&token=${token}`;
@@ -87,7 +108,7 @@ const createTrelloLists = () => {
         { name: 'À faire', create: toDoList },
         { name: 'Terminé', create: doneList }
       ]);
-      const req = https.request('https://winning-sheep-only.ngrok-free.app/webhook/ea199af5-6050-4afd-8dd5-027c04b92c9e', options, function (res) {
+      const req = https.request('https://winning-sheep-only.ngrok-free.app/webhook/create-lists', options, function (res) {
         console.log('STATUS: ' + res.statusCode);
         console.log('HEADERS: ' + JSON.stringify(res.headers));
         res.setEncoding('utf8');
