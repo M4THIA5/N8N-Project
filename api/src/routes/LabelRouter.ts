@@ -113,18 +113,18 @@ labelRouter.put('/:id', (req, res) => {
 
       let query = 'UPDATE labels';
       if (name) {
-        query += ' SET name = ' + name;
+        query += ' SET name = \'' + name+'\'';
       }
       if (color) {
         if (name) {
           query += ',';
         }
-        query += ' SET color = ' + color;
+        query += ' SET color = \'' + color+'\'';
       }
       query += 'WHERE id = ?';
       db.query(query, [req.params.id], function (err) {
         if (err) {
-          res.status(500).send('Error updating label');
+          res.status(500).send('Error updating label : '+ err);
         } else {
           const postData = JSON.stringify({
             name: name,
