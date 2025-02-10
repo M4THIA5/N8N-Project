@@ -269,17 +269,6 @@ labelRouter.get('/:id/tasks', (req, res) => {
       return;
     }
 
-    const check = 'SELECT * FROM tasks WHERE list_id = ? AND user_id = ?';
-
-    db.query(check, [req.params.id, row[0].id], (err, row) => {
-      if (err) {
-        res.status(500).send('Error fetching list' +err);
-        return;
-      }
-      if (!row) {
-        res.status(404).send('List not found');
-        return;
-      }
 
       const query = 'SELECT t.* FROM tasks_labels tl INNER JOIN tasks t on t.id = tl.task_id WHERE label_id = ?';
 
@@ -292,7 +281,6 @@ labelRouter.get('/:id/tasks', (req, res) => {
       });
     });
   });
-});
 
 labelRouter.put('/addontask/:id', (req, res) => {
   const { username, password, task_id } = req.body;
