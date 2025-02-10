@@ -19,7 +19,7 @@ labelRouter.get('/', (req, res) => {
       res.status(500).send('Error fetching user');
       return;
     }
-    if (!row) {
+    if (!row[0]) {
       res.status(401).send('Authentication failed');
       return;
     }
@@ -112,7 +112,7 @@ labelRouter.put('/:id', (req, res) => {
       res.status(500).send('Error fetching user');
       return;
     }
-    if (!row) {
+    if (!row[0]) {
       res.status(401).send('Authentication failed');
       return;
     }
@@ -197,7 +197,7 @@ labelRouter.delete('/:id', (req, res) => {
       res.status(500).send('Error fetching user');
       return;
     }
-    if (!row) {
+    if (!row[0]) {
       res.status(401).send('Authentication failed');
       return;
     }
