@@ -264,7 +264,7 @@ labelRouter.get('/:id/tasks', (req, res) => {
       res.status(500).send('Error fetching user');
       return;
     }
-    if (!row) {
+    if (!row[0]) {
       res.status(401).send('Authentication failed');
       return;
     }
