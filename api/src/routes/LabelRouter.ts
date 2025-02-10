@@ -311,7 +311,7 @@ labelRouter.put('/addontask/:id', (req, res) => {
         res.status(500).send('Error fetching list'+ err);
         return;
       }
-      if (row) {
+      if (row[0]) {
         res.status(400).send('Label already on task');
         return;
       }
