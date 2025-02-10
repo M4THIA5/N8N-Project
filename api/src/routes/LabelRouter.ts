@@ -66,6 +66,10 @@ labelRouter.post('/', (req, res) => {
     const query = 'INSERT INTO labels (name, color) VALUES (?, ?)';
     db.query(query, [name, color], function (err, roww) {
       if (err) {
+        if (err.code === 'ER_DUP_ENTRY') {
+          res.status(409).send('Label already exists');
+          return;
+        }
         res.status(500).send('Error inserting new label'+ err);
       } else {
         const postData = JSON.stringify({

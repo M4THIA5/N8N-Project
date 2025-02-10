@@ -47,7 +47,8 @@ const createTableLabel = () => {
     id INTEGER PRIMARY KEY AUTO_INCREMENT,
     name TEXT DEFAULT '',
     color TEXT default null,
-    trello_id TEXT default null
+    trello_id TEXT default null,
+    unique(name, color)
   )`;
 
 
