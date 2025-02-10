@@ -119,9 +119,9 @@ labelRouter.put('/:id', (req, res) => {
         if (name) {
           query += ',';
         }
-        query += ' SET color = \'' + color+'\'';
+        query += ' color = \'' + color+'\'';
       }
-      query += 'WHERE id = ?';
+      query += ' WHERE id = ?';
       db.query(query, [req.params.id], function (err) {
         if (err) {
           res.status(500).send('Error updating label : '+ err);
@@ -192,7 +192,7 @@ labelRouter.delete('/:id', (req, res) => {
 
       db.query(query, [req.params.id], function (err) {
         if (err) {
-          res.status(500).send('Error deleting label');
+          res.status(500).send('Error deleting label' + err);
         } else {
           const postData = JSON.stringify({
             name: rowr[0].name,
