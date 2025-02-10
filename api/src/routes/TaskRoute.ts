@@ -96,8 +96,8 @@ taskRouter.post('/', (req, res) => {
             'taskname': name,
             'deadline': deadline,
             'description': description,
-            'list_id': (list_id ?? null),
             'username': usr[0].name,
+            'id': row.insertId
           })
           const options = {
             port: 443,
@@ -186,5 +186,57 @@ taskRouter.put('/:id', (req, res) => {
     });
   });
 });
+
+
+taskRouter.delete('/:id', (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password) {
+    res.status(401).send('Authentication required');
+    return;
+  }
+  const auth = 'SELECT * FROM users WHERE username = ? AND password = ?';
+  db.query(auth, [username, password], (err, row) => {
+    if (err) {
+      res.status(500).send('Error fetching user');
+      return;
+    }
+    if (!row[0]) {
+      res.status(401).send('Invalid credentials');
+      return;
+    }
+    const query = 'DELETE FROM tasks WHERE id = ? AND user_id = (SELECT id FROM users WHERE username = ? AND password = ?)';
+    db.query(query, [req.params.id, username, password], (err, row) => {
+      if (err) {
+        res.status(500).send('Error deleting task');
+      } else {
+        const postData = JSON.stringify({
+          'task_id': req.params.id,
+          'username': username,
+        })
+        const options = {
+          port: 443,
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(postData),
+          },
+        };
+        const requ = https.request("https://winning-sheep-only.ngrok-free.app/webhook/delete-task", options, function (resu) {
+          console.log('STATUS: ' + resu.statusCode);
+          console.log('HEADERS: ' + JSON.stringify(resu.headers));
+          resu.setEncoding('utf8');
+          resu.on('data', function (chunk) {
+            console.log('BODY: ' + chunk);
+          });
+        })
+        requ.write(postData);
+        requ.end();
+
+        res.status(200).send(`Task deleted with id ${req.params.id}`);
+      }
+    });
+  });
+});
+
 
 export default taskRouter;

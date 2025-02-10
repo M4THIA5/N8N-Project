@@ -37,10 +37,10 @@ labelRouter.post('/', (req, res) => {
     return;
     }
 
-    const query = 'INSERT INTO label (name, color) VALUES (?, ?)';
+    const query = 'INSERT INTO labels (name, color) VALUES (?, ?)';
     db.query(query, [name, color], function (err, roww) {
       if (err) {
-        res.status(500).send('Error inserting new list');
+        res.status(500).send('Error inserting new label'+ err);
       } else {
         const postData = JSON.stringify({
           name: name,
@@ -106,6 +106,10 @@ labelRouter.put('/:id', (req, res) => {
         res.status(404).send('label not found');
         return;
       }
+      if (!isValid(color)) {
+        res.status(400).send('Invalid color');
+        return;
+      }
 
       let query = 'UPDATE labels';
       if (name) {
@@ -125,6 +129,7 @@ labelRouter.put('/:id', (req, res) => {
           const postData = JSON.stringify({
             name: name,
             color: color,
+            id: row[0].trello_id
           });
           const options = {
             port: 443,
@@ -253,7 +258,7 @@ labelRouter.get('/:id/tasks', (req, res) => {
 
       db.query(query, [req.params.id], (err, rows) => {
         if (err) {
-          res.status(500).send('Error fetching tasks');
+          res.status(500).send('Error fetching tasks : '+ err);
         } else {
           res.status(200).json(rows);
         }

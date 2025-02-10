@@ -27,6 +27,7 @@ const createTableTask = () => {
     description TEXT,
     user_id INTEGER,
     deadline TIMESTAMP,
+    trello_id TEXT default null,
     done BOOLEAN DEFAULT 0,
     sent BOOLEAN DEFAULT 0,
     FOREIGN KEY (user_id) REFERENCES users(id)
