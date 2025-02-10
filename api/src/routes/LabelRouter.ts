@@ -308,7 +308,7 @@ labelRouter.put('/addontask/:id', (req, res) => {
     const check = 'SELECT * FROM labels_tasks WHERE label_id = ? AND task_id = ?';
     db.query(check, [req.params.id, task_id], (err, row) => {
       if (err) {
-        res.status(500).send('Error fetching list');
+        res.status(500).send('Error fetching list'+ err);
         return;
       }
       if (row) {
