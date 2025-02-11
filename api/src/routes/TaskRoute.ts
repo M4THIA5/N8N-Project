@@ -149,12 +149,12 @@ taskRouter.put('/:id', (req, res) => {
 
     const check = 'SELECT * FROM tasks WHERE id = ? AND user_id = (SELECT id FROM users WHERE username = ? AND password = ?)';
 
-    db.query(check, [req.params.id, username, password], (err, row) => {
+    db.query(check, [req.params.id, username, password], (err, roz) => {
       if (err) {
         res.status(500).send('Error fetching task');
         return;
       }
-      if (!row[0]) {
+      if (!roz[0]) {
         res.status(404).send('Task not found');
         return;
       }
@@ -179,7 +179,34 @@ taskRouter.put('/:id', (req, res) => {
         if (err) {
           res.status(500).send('Error updating task');
         } else {
-          // TODO request
+
+          const postdata = JSON.stringify({
+            'task_id': req.params.id,
+            'username': row[0].name,
+            'name': name,
+            'description': description,
+            'deadline': deadline
+          })
+          const options = {
+            port: 443,
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Content-Length': Buffer.byteLength(postdata),
+            },
+          };
+          const requ = https.request("https://winning-sheep-only.ngrok-free.app/webhook/update-task", options, function (resu) {
+            console.log('STATUS: ' + resu.statusCode);
+            console.log('HEADERS: ' + JSON.stringify(resu.headers));
+            resu.setEncoding('utf8');
+            resu.on('data', function (chunk) {
+              console.log('BODY: ' + chunk);
+            });
+          })
+          requ.write(postdata);
+          requ.end();
+
+
           res.status(200).send(`Task updated with id ${req.params.id}`);
         }
       });

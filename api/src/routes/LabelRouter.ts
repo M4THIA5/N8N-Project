@@ -351,7 +351,7 @@ labelRouter.put('/addontask/:id', (req, res) => {
 });
 
 
-labelRouter.put('/removeontask/:id', (req, res) => {
+labelRouter.delete('/removeontask/:id', (req, res) => {
   const { username, password, task_id } = req.body;
 
   if (!username || !password || !task_id) {

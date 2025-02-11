@@ -102,14 +102,18 @@ const createTrelloLists = () => {
           doneList = true;
         }
       }
-      const options = {
-        port: 443,
-        method: 'POST'
-      };
       const json = JSON.stringify([
         { name: 'À faire', create: toDoList },
         { name: 'Terminé', create: doneList }
       ]);
+      const options = {
+        port: 443,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(json),
+        },
+      };
       const req2 = https.request('https://winning-sheep-only.ngrok-free.app/webhook/create-lists', options, function (res) {
         console.log('STATUS: ' + res.statusCode);
         console.log('HEADERS: ' + JSON.stringify(res.headers));
