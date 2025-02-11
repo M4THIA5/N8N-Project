@@ -92,19 +92,19 @@ const createTrelloLists = () => {
     resu.setEncoding('utf8');
     resu.on('data', function (chunk: string) {
       const body = JSON.parse(chunk);
-      let doneList = false;
-      let toDoList = false;
+      let doneListNeedsCreation = true;
+      let toDoListNeedsCreation = true;
       for (const list of body) {
         if (list.name === 'À faire') {
-          toDoList = true;
+          toDoListNeedsCreation = false;
         }
         if (list.name === 'Terminé') {
-          doneList = true;
+          doneListNeedsCreation = false;
         }
       }
       const json = JSON.stringify([
-        { name: 'À faire', create: toDoList },
-        { name: 'Terminé', create: doneList }
+        { name: 'À faire', create: toDoListNeedsCreation },
+        { name: 'Terminé', create: doneListNeedsCreation }
       ]);
       const options = {
         port: 443,
