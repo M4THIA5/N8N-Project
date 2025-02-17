@@ -100,7 +100,7 @@ userRouter.post('/done/:id', (req, res) => {
                         res.status(500).send('Error fetching task');
                         return;
                     }
-                    if (!row) {
+                    if (!row[0]) {
                         res.status(404).send('Task not found');
                         return;
                     }
@@ -127,7 +127,7 @@ userRouter.post('/done/:id', (req, res) => {
                     })
                     request.write(postData);
                     request.end();
-                    res.status(200).send(`Task updated with id ${req.params.id}`);
+                    res.status(200).send(`Task said as done with id ${req.params.id}`);
                 }
                 )
             };

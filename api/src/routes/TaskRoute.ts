@@ -177,7 +177,7 @@ taskRouter.put('/:id', (req, res) => {
       query += ' WHERE id = ?';
       db.query(query, [req.params.id], function (err) {
         if (err) {
-          res.status(500).send('Error updating task');
+          res.status(500).send('Error updating task: '+err );
         } else {
 
           const postdata = JSON.stringify({
