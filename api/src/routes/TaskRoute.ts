@@ -166,13 +166,13 @@ taskRouter.put('/:id', (req, res) => {
         if (name) {
           query += ','
         }
-        query += ' SET description= ' + description
+        query += ' description= ' + description
       }
       if (deadline) {
         if (name || description) {
           query += ','
         }
-        query += ' SET deadline= ' + Date.parse(deadline)
+        query += ' deadline= ' + Date.parse(deadline)
       }
       query += ' WHERE id = ?';
       db.query(query, [req.params.id], function (err) {
