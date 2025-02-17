@@ -160,19 +160,19 @@ taskRouter.put('/:id', (req, res) => {
       }
       let query = 'UPDATE tasks'
       if (name) {
-        query += ' SET name= ' + name
+        query += ' SET name= "' + name+"\""
       }
       if (description) {
         if (name) {
           query += ','
         }
-        query += ' description= ' + description
+        query += ' description= "' + description+"\""
       }
       if (deadline) {
         if (name || description) {
           query += ','
         }
-        query += ' deadline= ' + Date.parse(deadline)
+        query += ' deadline= "' + deadline+"\""
       }
       query += ' WHERE id = ?';
       db.query(query, [req.params.id], function (err) {

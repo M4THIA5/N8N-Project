@@ -93,44 +93,43 @@ userRouter.post('/done/:id', (req, res) => {
         db.query(query1, [req.params.id, usr[0].id], function (err) {
             if (err) {
                 res.status(500).send('Error updating task :' + err);
-            } else {
-                const query2 = 'SELECT * FROM tasks WHERE id = ?';
-                db.query(query2, [req.params.id], (err, row) => {
-                    if (err) {
-                        res.status(500).send('Error fetching task');
-                        return;
-                    }
-                    if (!row[0]) {
-                        res.status(404).send('Task not found');
-                        return;
-                    }
-                    const postData = JSON.stringify({
-                        'taskname': row[0].name,
-                        'username': usr[0].name,
-                    })
-
-                    const options = {
-                        port: 443,
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Content-Length': Buffer.byteLength(postData),
-                        },
-                    };
-                    const request = https.request("https://winning-sheep-only.ngrok-free.app/webhook/task-finished", options, function (resu) {
-                        console.log('STATUS: ' + resu.statusCode);
-                        console.log('HEADERS: ' + JSON.stringify(resu.headers));
-                        resu.setEncoding('utf8');
-                        resu.on('data', function (chunk) {
-                            console.log('BODY: ' + chunk);
-                        });
-                    })
-                    request.write(postData);
-                    request.end();
-                    res.status(200).send(`Task said as done with id ${req.params.id}`);
+                return;
+            }
+            const query2 = 'SELECT * FROM tasks WHERE id = ?';
+            db.query(query2, [req.params.id], (err, row) => {
+                if (err) {
+                    res.status(500).send('Error fetching task');
+                    return;
                 }
-                )
-            };
+                if (!row[0]) {
+                    res.status(404).send('Task not found');
+                    return;
+                }
+                const postData = JSON.stringify({
+                    'taskname': row[0].name,
+                    'username': usr[0].name,
+                })
+
+                const options = {
+                    port: 443,
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Content-Length': Buffer.byteLength(postData),
+                    },
+                };
+                const request = https.request("https://winning-sheep-only.ngrok-free.app/webhook/task-finished", options, function (resu) {
+                    console.log('STATUS: ' + resu.statusCode);
+                    console.log('HEADERS: ' + JSON.stringify(resu.headers));
+                    resu.setEncoding('utf8');
+                    resu.on('data', function (chunk) {
+                        console.log('BODY: ' + chunk);
+                    });
+                })
+                request.write(postData);
+                request.end();
+                res.status(200).send(`Task said as done with id ${req.params.id}`);
+            })
         });
     });
 });
